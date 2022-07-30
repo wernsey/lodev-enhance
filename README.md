@@ -8,3 +8,11 @@ The rest of the original tutorials are here [Lode's Computer Graphics Tutorial][
 
 [cgtutor]: https://lodev.org/cgtutor/
 [raycast3]: https://lodev.org/cgtutor/raycasting3.html
+
+## Step 1
+
+* Fixed som compiler warnings
+* Replaced the Wolfenstein graphics with CC0 graphics from Dungeon Crawl Stone Soup (DCSS)
+
+The Dungeon Crawl Stone Soup graphics are from here:
+<https://opengameart.org/content/dungeon-crawl-32x32-tiles>

@@ -37,8 +37,8 @@ g++ *.cpp -lSDL
 
 #define screenWidth 640
 #define screenHeight 480
-#define texWidth 64 // must be power of two
-#define texHeight 64 // must be power of two
+#define texWidth 32 // must be power of two
+#define texHeight 32 // must be power of two
 #define mapWidth 24
 #define mapHeight 24
 
@@ -135,20 +135,20 @@ int main(int /*argc*/, char */*argv*/[])
 
   //load some textures
   unsigned long tw, th, error = 0;
-  error |= loadImage(texture[0], tw, th, "pics/eagle.png");
-  error |= loadImage(texture[1], tw, th, "pics/redbrick.png");
-  error |= loadImage(texture[2], tw, th, "pics/purplestone.png");
-  error |= loadImage(texture[3], tw, th, "pics/greystone.png");
-  error |= loadImage(texture[4], tw, th, "pics/bluestone.png");
-  error |= loadImage(texture[5], tw, th, "pics/mossy.png");
-  error |= loadImage(texture[6], tw, th, "pics/wood.png");
-  error |= loadImage(texture[7], tw, th, "pics/colorstone.png");
+  error |= loadImage(texture[0], tw, th, "pics/wall1.png");
+  error |= loadImage(texture[1], tw, th, "pics/wall2.png");
+  error |= loadImage(texture[2], tw, th, "pics/wall3.png");
+  error |= loadImage(texture[3], tw, th, "pics/tile1.png");
+  error |= loadImage(texture[4], tw, th, "pics/tile2.png");
+  error |= loadImage(texture[5], tw, th, "pics/tile3.png");
+  error |= loadImage(texture[6], tw, th, "pics/tile4.png");
+  error |= loadImage(texture[7], tw, th, "pics/tile5.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
-  error |= loadImage(texture[8], tw, th, "pics/barrel.png");
-  error |= loadImage(texture[9], tw, th, "pics/pillar.png");
-  error |= loadImage(texture[10], tw, th, "pics/greenlight.png");
+  error |= loadImage(texture[8], tw, th, "pics/altar.png");
+  error |= loadImage(texture[9], tw, th, "pics/fountain.png");
+  error |= loadImage(texture[10], tw, th, "pics/statue.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //start the main loop
@@ -452,6 +452,7 @@ int main(int /*argc*/, char */*argv*/[])
       break;
     }
   }
+  return 0;
 }
 
 //sort the sprites based on distance
