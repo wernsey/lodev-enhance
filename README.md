@@ -21,5 +21,7 @@ The Dungeon Crawl Stone Soup graphics are from here:
 
 # Step 2: Better vertical strips
 
-Step 2 is to convert the code that
+Step 2 is to convert the code that draws the vertical strips to use integer only arithmetic
+
+commit e0f5cbbc6e2bb3011b210c3a2a2a779c6896769a
 
