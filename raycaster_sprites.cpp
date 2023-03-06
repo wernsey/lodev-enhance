@@ -293,9 +293,7 @@ int main(int /*argc*/, char */*argv*/[])
 
       //calculate lowest and highest pixel to fill in current stripe
       int drawStart = -lineHeight / 2 + h / 2;
-      if(drawStart < 0) drawStart = 0;
       int drawEnd = lineHeight / 2 + h / 2;
-      if(drawEnd >= h) drawEnd = h - 1;
       //texturing calculations
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
@@ -309,6 +307,40 @@ int main(int /*argc*/, char */*argv*/[])
       int texX = int(wallX * double(texWidth));
       if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
       if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
+
+#if 1
+      int texY = 0, c = 0;
+      int dy = drawEnd - drawStart;
+
+      if(drawStart < 0) {
+          c = -drawStart * texHeight;
+          if(c > dy) {
+              div_t res = div(c, dy);
+              texY += res.quot;
+              c = res.rem;
+          }
+          drawStart = 0;
+      }
+      if(drawEnd >= h)
+        drawEnd = (h-1);
+
+      for(int y = drawStart; y < drawEnd; y++) {
+
+        Uint32 color = texture[texNum][texHeight * texY + texX];
+        //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
+        if(side == 1) color = (color >> 1) & 8355711;
+        buffer[y][x] = color;
+
+        c += texHeight;
+        while(c > dy) {
+          texY++;
+          c -= dy;
+        }
+      }
+
+#else
+      if(drawStart < 0) drawStart = 0;
+      if(drawEnd >= h) drawEnd = h - 1;
 
       // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
       // How much to increase the texture coordinate per screen pixel
@@ -325,6 +357,7 @@ int main(int /*argc*/, char */*argv*/[])
         if(side == 1) color = (color >> 1) & 8355711;
         buffer[y][x] = color;
       }
+#endif
 
       //SET THE ZBUFFER FOR THE SPRITE CASTING
       ZBuffer[x] = perpWallDist; //perpendicular distance is used
