@@ -368,6 +368,8 @@ int main(int /*argc*/, char */*argv*/[])
       double transformX = invDet * (dirY * spriteX - dirX * spriteY);
       double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
 
+      if(transformY < 0) continue;
+
       int spriteScreenX = int((w / 2) * (1 + transformX / transformY));
 
       //parameters for scaling and moving the sprites
@@ -387,46 +389,57 @@ int main(int /*argc*/, char */*argv*/[])
       //calculate width of the sprite
       int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
       int drawStartX = -spriteWidth / 2 + spriteScreenX;
-      if(drawStartX < 0) drawStartX = 0;
       int drawEndX = spriteWidth / 2 + spriteScreenX;
-      if(drawEndX > w) drawEndX = w;
 
       // Precompute some variables for the vertical strips
-      int dy = drawEndY - drawStartY;
-      int c0 = 0, texY0 = 0;
+      int dY = drawEndY - drawStartY;
+      int cY0 = 0, texY0 = 0;
       if(drawStartY < 0) {
-          c0 = -drawStartY * texHeight;
-          if(c0 > dy) {
-              div_t res = div(c0, dy);
+          cY0 = -drawStartY * texHeight;
+          if(cY0 > dY) {
+              div_t res = div(cY0, dY);
               texY0 += res.quot;
-              c0 = res.rem;
+              cY0 = res.rem;
           }
           drawStartY = 0;
       }
       if(drawEndY >= h)
         drawEndY = (h-1);
 
-      //loop through every vertical stripe of the sprite on screen
-      for(int stripe = drawStartX; stripe < drawEndX; stripe++)
-      {
-        int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * texWidth / spriteWidth) / 256;
-        //the conditions in the if are:
-        //1) it's in front of camera plane so you don't see things behind you
-        //2) ZBuffer, with perpendicular distance
-        if(transformY > 0 && transformY < ZBuffer[stripe])
+      int texX = 0, dX = drawEndX - drawStartX, cX = 0;
+
+      if(drawStartX < 0) {
+          cX = -drawStartX * texWidth;
+          if(cX > dX) {
+              div_t res = div(cX, dX);
+              texX += res.quot;
+              cX = res.rem;
+          }
+          drawStartX = 0;
+      }
+      if(drawEndX > w) drawEndX = w;
+
+      for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
+        if(transformY < ZBuffer[stripe])
         {
-          int texY = texY0, c = c0;
+          int texY = texY0, cY = cY0;
           for(int y = drawStartY; y < drawEndY; y++) {
 
             Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
             if((color & 0x00FFFFFF) != 0) buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
 
-            c = c + texHeight;
-            while(c > dy) {
+            cY = cY + texHeight;
+            while(cY > dY) {
               texY++;
-              c = c - dy;
+              cY -= dY;
             }
           }
+        }
+
+        cX += texWidth;
+        while(cX > dX) {
+          texX++;
+          cX -= dX;
         }
       }
     }
