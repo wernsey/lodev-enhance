@@ -11,7 +11,9 @@ The rest of the original tutorials are here [Lode's Computer Graphics Tutorial][
 
 ## Step 1
 
-* Fixed som compiler warnings
+commit 71797ccd2dc8cd6d633d8ef4bb3a4e2ccc1cc242
+
+* Fixed some compiler warnings
 * Replaced the Wolfenstein graphics with CC0 graphics from Dungeon Crawl Stone Soup (DCSS)
 
 The Dungeon Crawl Stone Soup graphics are from here:

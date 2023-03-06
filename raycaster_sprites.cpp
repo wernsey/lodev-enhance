@@ -293,9 +293,7 @@ int main(int /*argc*/, char */*argv*/[])
 
       //calculate lowest and highest pixel to fill in current stripe
       int drawStart = -lineHeight / 2 + h / 2;
-      if(drawStart < 0) drawStart = 0;
       int drawEnd = lineHeight / 2 + h / 2;
-      if(drawEnd >= h) drawEnd = h - 1;
       //texturing calculations
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
@@ -310,20 +308,34 @@ int main(int /*argc*/, char */*argv*/[])
       if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
       if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
 
-      // TODO: an integer-only bresenham or DDA like algorithm could make the texture coordinate stepping faster
-      // How much to increase the texture coordinate per screen pixel
-      double step = 1.0 * texHeight / lineHeight;
-      // Starting texture coordinate
-      double texPos = (drawStart - h / 2 + lineHeight / 2) * step;
-      for(int y = drawStart; y < drawEnd; y++)
-      {
-        // Cast the texture coordinate to integer, and mask with (texHeight - 1) in case of overflow
-        int texY = (int)texPos & (texHeight - 1);
-        texPos += step;
+      // Draw the vertical strip
+      int texY = 0, c = 0;
+      int dy = drawEnd - drawStart;
+
+      if(drawStart < 0) {
+          c = -drawStart * texHeight;
+          if(c > dy) {
+              div_t res = div(c, dy);
+              texY += res.quot;
+              c = res.rem;
+          }
+          drawStart = 0;
+      }
+      if(drawEnd >= h)
+        drawEnd = (h-1);
+
+      for(int y = drawStart; y < drawEnd; y++) {
+
         Uint32 color = texture[texNum][texHeight * texY + texX];
         //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
         if(side == 1) color = (color >> 1) & 8355711;
         buffer[y][x] = color;
+
+        c += texHeight;
+        while(c > dy) {
+          texY++;
+          c -= dy;
+        }
       }
 
       //SET THE ZBUFFER FOR THE SPRITE CASTING
@@ -356,45 +368,78 @@ int main(int /*argc*/, char */*argv*/[])
       double transformX = invDet * (dirY * spriteX - dirX * spriteY);
       double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
 
+      if(transformY < 0) continue;
+
       int spriteScreenX = int((w / 2) * (1 + transformX / transformY));
 
       //parameters for scaling and moving the sprites
-      #define uDiv 1
-      #define vDiv 1
-      #define vMove 0.0
+      #define uDiv 2
+      #define vDiv 2
+      // Note that vMove is 128 rather than 64 to get the sprites on the ground.
+      // It's because the textures are 32x32, rather than 64x64 as in the original.
+      #define vMove 128.0
       int vMoveScreen = int(vMove / transformY);
 
       //calculate height of the sprite on screen
       int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
       //calculate lowest and highest pixel to fill in current stripe
       int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen;
-      if(drawStartY < 0) drawStartY = 0;
       int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen;
-      if(drawEndY >= h) drawEndY = h - 1;
 
       //calculate width of the sprite
       int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
       int drawStartX = -spriteWidth / 2 + spriteScreenX;
-      if(drawStartX < 0) drawStartX = 0;
       int drawEndX = spriteWidth / 2 + spriteScreenX;
+
+      // Precompute some variables for the vertical strips
+      int dY = drawEndY - drawStartY;
+      int cY0 = 0, texY0 = 0;
+      if(drawStartY < 0) {
+          cY0 = -drawStartY * texHeight;
+          if(cY0 > dY) {
+              div_t res = div(cY0, dY);
+              texY0 += res.quot;
+              cY0 = res.rem;
+          }
+          drawStartY = 0;
+      }
+      if(drawEndY >= h)
+        drawEndY = (h-1);
+
+      int texX = 0, dX = drawEndX - drawStartX, cX = 0;
+
+      if(drawStartX < 0) {
+          cX = -drawStartX * texWidth;
+          if(cX > dX) {
+              div_t res = div(cX, dX);
+              texX += res.quot;
+              cX = res.rem;
+          }
+          drawStartX = 0;
+      }
       if(drawEndX > w) drawEndX = w;
 
-      //loop through every vertical stripe of the sprite on screen
-      for(int stripe = drawStartX; stripe < drawEndX; stripe++)
-      {
-        int texX = int(256 * (stripe - (-spriteWidth / 2 + spriteScreenX)) * texWidth / spriteWidth) / 256;
-        //the conditions in the if are:
-        //1) it's in front of camera plane so you don't see things behind you
-        //2) ZBuffer, with perpendicular distance
-        if(transformY > 0 && transformY < ZBuffer[stripe])
+      for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
+        if(transformY < ZBuffer[stripe])
         {
-          for(int y = drawStartY; y < drawEndY; y++) //for every pixel of the current stripe
-          {
-            int d = (y - vMoveScreen) * 256 - h * 128 + spriteHeight * 128; //256 and 128 factors to avoid floats
-            int texY = ((d * texHeight) / spriteHeight) / 256;
+          int texY = texY0, cY = cY0;
+          for(int y = drawStartY; y < drawEndY; y++) {
+
             Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
             if((color & 0x00FFFFFF) != 0) buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
+
+            cY = cY + texHeight;
+            while(cY > dY) {
+              texY++;
+              cY -= dY;
+            }
           }
+        }
+
+        cX += texWidth;
+        while(cX > dX) {
+          texX++;
+          cX -= dX;
         }
       }
     }
