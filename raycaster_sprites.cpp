@@ -42,6 +42,11 @@ g++ *.cpp -lSDL
 #define mapWidth 24
 #define mapHeight 24
 
+#define SKYBOX 1
+#define SKYBOX_WIDTH    320
+#define SKYBOX_HEIGHT   200
+#define SKYBOX_REPEATS  4
+
 int worldMap[mapWidth][mapHeight] =
 {
   {8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
@@ -131,6 +136,10 @@ int main(int /*argc*/, char */*argv*/[])
   std::vector<Uint32> texture[11];
   for(int i = 0; i < 11; i++) texture[i].resize(texWidth * texHeight);
 
+#if SKYBOX
+  std::vector<Uint32> skybox{320 * 240};
+#endif
+
   screen(screenWidth,screenHeight, 0, "Raycaster");
 
   //load some textures
@@ -150,10 +159,63 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[9], tw, th, "pics/fountain.png");
   error |= loadImage(texture[10], tw, th, "pics/statue.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
+#if SKYBOX
+  error |= loadImage(skybox, tw, th, "pics/skybox.png");
+  if(error) { std::cout << "error loading skybox" << std::endl; return 1; }
+#endif
 
   //start the main loop
   while(!done())
   {
+
+#if SKYBOX
+    {
+      int texX;
+      double rayDirX0 = dirX - planeX;
+      double rayDirY0 = dirY - planeY;
+      double rayDirX1 = dirX + planeX;
+      double rayDirY1 = dirY + planeY;
+
+      int texX0 = (int)(-atan2(rayDirY0, rayDirX0) * (double)SKYBOX_WIDTH/(2 * M_PI) * SKYBOX_REPEATS);
+      int texX1 = (int)(-atan2(rayDirY1, rayDirX1) * (double)SKYBOX_WIDTH/(2 * M_PI) * SKYBOX_REPEATS);
+      while(texX1 < texX0)
+          texX1 += SKYBOX_WIDTH;
+      while(texX0 < 0) {
+        texX0 += SKYBOX_WIDTH;
+        texX1 += SKYBOX_WIDTH;
+      }
+
+      int dtexX = texX1 - texX0;
+      int dy = h/2;
+      int dtexY = SKYBOX_HEIGHT - 1;
+      for(int x = 0, cX = 0; x < w; x++) {
+
+          if(texX0 >= SKYBOX_WIDTH) {
+              texX = texX0 - SKYBOX_WIDTH;
+          } else
+              texX = texX0;
+
+          for(int y = 0, texY = 0, cY = 0; y < dy; y++) {
+
+              Uint32 color = skybox[SKYBOX_WIDTH * texY + texX];
+              buffer[y][x] = color;
+
+              cY = cY + dtexY;
+              while(cY > dy) {
+                  texY = texY + 1;
+                  cY = cY - dy;
+              }
+          }
+
+          cX = cX + dtexX;
+          while(cX > w) {
+              texX0 = texX0 + 1;
+              cX = cX - w;
+          }
+      }
+    }
+#endif
+
     //FLOOR CASTING
     for(int y = screenHeight / 2 + 1; y < screenHeight; ++y)
     {
@@ -200,7 +262,9 @@ int main(int /*argc*/, char */*argv*/[])
         int floorTexture;
         if(checkerBoardPattern == 0) floorTexture = 3;
         else floorTexture = 4;
+#if !SKYBOX
         int ceilingTexture = 6;
+#endif
         Uint32 color;
 
         // floor
@@ -208,10 +272,12 @@ int main(int /*argc*/, char */*argv*/[])
         color = (color >> 1) & 8355711; // make a bit darker
         buffer[y][x] = color;
 
+#if !SKYBOX
         //ceiling (symmetrical, at screenHeight - y - 1 instead of y)
         color = texture[ceilingTexture][texWidth * ty + tx];
         color = (color >> 1) & 8355711; // make a bit darker
         buffer[screenHeight - y - 1][x] = color;
+#endif
       }
     }
 
