@@ -47,6 +47,10 @@ g++ *.cpp -lSDL
 #define SKYBOX_HEIGHT   200
 #define SKYBOX_REPEATS  4
 
+#define FOG_LEVEL 2
+#define FOG_COLOR 0xA09EE7
+#define FOG_CONSTANT ((mapWidth + mapHeight)/2)
+
 int worldMap[mapWidth][mapHeight] =
 {
   {8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
@@ -86,8 +90,7 @@ struct Sprite
 
 Sprite sprite[numSprites] =
 {
-  {20.5, 11.5, 10}, //green light in front of playerstart
-  //green lights in every room
+  {20.5, 11.5, 10},
   {18.5,4.5, 10},
   {10.0,4.5, 10},
   {10.0,12.5,10},
@@ -96,12 +99,10 @@ Sprite sprite[numSprites] =
   {3.5, 14.5,10},
   {14.5,20.5,10},
 
-  //row of pillars in front of wall: fisheye test
   {18.5, 10.5, 9},
   {18.5, 11.5, 9},
   {18.5, 12.5, 9},
 
-  //some barrels around the map
   {21.5, 1.5, 8},
   {15.5, 1.5, 8},
   {16.0, 1.8, 8},
@@ -123,6 +124,36 @@ double spriteDistance[numSprites];
 
 //function used to sort the sprites
 void sortSprites(int* order, double* dist, int amount);
+
+#if FOG_LEVEL
+Uint32 color_lerp(Uint32 color1, Uint32 color2, double t) {
+
+  if(t < 0)
+    return color1;
+  if(t >= 1)
+    return color2;
+
+  Uint32 r1 = (color1 >> 16) & 0xFF;
+  Uint32 r2 = (color2 >> 16) & 0xFF;
+
+  Uint32 g1 = (color1 >> 8) & 0xFF;
+  Uint32 g2 = (color2 >> 8) & 0xFF;
+
+  Uint32 b1 = (color1) & 0xFF;
+  Uint32 b2 = (color2) & 0xFF;
+
+  r1 = (1-t) * r1 + t * r2;
+  if(r1 > 0xFF) r1 = 0xFF;
+
+  g1 = (1-t) * g1 + t * g2;
+  if(g1 > 0xFF) g1 = 0xFF;
+
+  b1 = (1-t) * b1 + t * b2;
+  if(b1 > 0xFF) b1 = 0xFF;
+
+  return (r1 << 16) + (g1 << 8) + (b1);
+}
+#endif
 
 int main(int /*argc*/, char */*argv*/[])
 {
@@ -244,6 +275,10 @@ int main(int /*argc*/, char */*argv*/[])
       float floorX = posX + rowDistance * rayDirX0;
       float floorY = posY + rowDistance * rayDirY0;
 
+#if FOG_LEVEL
+      double fog = rowDistance / FOG_CONSTANT * FOG_LEVEL;
+#endif
+
       for(int x = 0; x < screenWidth; ++x)
       {
         // the cell coord is simply got from the integer parts of floorX and floorY
@@ -270,12 +305,18 @@ int main(int /*argc*/, char */*argv*/[])
         // floor
         color = texture[floorTexture][texWidth * ty + tx];
         color = (color >> 1) & 8355711; // make a bit darker
+#if FOG_LEVEL
+        color = color_lerp(color, FOG_COLOR, fog);
+#endif
         buffer[y][x] = color;
 
 #if !SKYBOX
         //ceiling (symmetrical, at screenHeight - y - 1 instead of y)
         color = texture[ceilingTexture][texWidth * ty + tx];
         color = (color >> 1) & 8355711; // make a bit darker
+#if FOG_LEVEL
+        color = color_lerp(color, FOG_COLOR, fog);
+#endif
         buffer[screenHeight - y - 1][x] = color;
 #endif
       }
@@ -390,11 +431,19 @@ int main(int /*argc*/, char */*argv*/[])
       if(drawEnd >= h)
         drawEnd = (h-1);
 
+#if FOG_LEVEL
+      double fog = perpWallDist / FOG_CONSTANT * FOG_LEVEL;
+#endif
+
       for(int y = drawStart; y < drawEnd; y++) {
 
         Uint32 color = texture[texNum][texHeight * texY + texX];
         //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
         if(side == 1) color = (color >> 1) & 8355711;
+
+#if FOG_LEVEL
+        color = color_lerp(color, FOG_COLOR, fog);
+#endif
         buffer[y][x] = color;
 
         c += texHeight;
@@ -485,6 +534,10 @@ int main(int /*argc*/, char */*argv*/[])
       }
       if(drawEndX > w) drawEndX = w;
 
+#if FOG_LEVEL
+      double fog = transformY / FOG_CONSTANT * FOG_LEVEL;
+#endif
+
       for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
         if(transformY < ZBuffer[stripe])
         {
@@ -492,7 +545,12 @@ int main(int /*argc*/, char */*argv*/[])
           for(int y = drawStartY; y < drawEndY; y++) {
 
             Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
-            if((color & 0x00FFFFFF) != 0) buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
+            if((color & 0x00FFFFFF) != 0) {
+#if FOG_LEVEL
+              color = color_lerp(color, FOG_COLOR, fog);
+#endif
+              buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
+            }
 
             cY = cY + texHeight;
             while(cY > dY) {

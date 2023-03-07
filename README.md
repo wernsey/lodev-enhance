@@ -40,3 +40,7 @@ commit 34993e41b08c4ec51b0b936ae5d99afa2d5f9ac5
 While you're at it, you can do the same for the horizontal part of the sprite loop.
 
 # Step 3: Skybox
+
+commit c1d6246654886222c54d7fccdcbda7f228669b99
+
+# Step 4: Fog effects
