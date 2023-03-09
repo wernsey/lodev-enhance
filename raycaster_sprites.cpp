@@ -538,7 +538,7 @@ rayscan:
       double fog = perpWallDist / FOG_CONSTANT * FOG_LEVEL;
 #endif
 
-      for(int y = drawStart; y < drawEnd; y++) {
+      for(int y = drawStart; y <= drawEnd; y++) {
 
         Uint32 color = texture[texNum][texHeight * texY + texX];
         //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
@@ -645,7 +645,7 @@ rayscan:
         if(transformY < ZBuffer[stripe])
         {
           int texY = texY0, cY = cY0;
-          for(int y = drawStartY; y < drawEndY; y++) {
+          for(int y = drawStartY; y <= drawEndY; y++) {
 
             Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
             if((color & 0x00FFFFFF) != 0) {
