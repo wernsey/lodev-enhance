@@ -53,30 +53,30 @@ g++ *.cpp -lSDL
 
 int worldMap[mapWidth][mapHeight] =
 {
-  {8,8,8,8,8,8,8,8,8,8,8,4,4,6,4,4,6,4,6,4,4,4,6,4},
-  {8,0,0,0,0,0,0,0,0,0,8,4,0,0,0,0,0,0,0,0,0,0,0,4},
-  {8,0,3,3,0,0,0,0,0,8,8,4,0,0,0,0,0,0,0,0,0,0,0,6},
-  {8,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6},
-  {8,0,3,3,0,0,0,0,0,8,8,4,0,0,0,0,0,0,0,0,0,0,0,4},
-  {8,0,0,0,0,0,0,0,0,0,8,4,0,0,0,0,0,6,6,6,0,6,4,6},
-  {8,8,8,8,0,8,8,8,8,8,8,4,4,4,4,4,4,6,0,0,0,0,0,6},
-  {7,7,7,7,0,7,7,7,7,0,8,0,8,0,8,0,8,4,0,4,0,6,0,6},
-  {7,7,0,0,0,0,0,0,7,8,0,8,0,8,0,8,8,6,0,0,0,0,0,6},
-  {7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,6,0,0,0,0,0,4},
-  {7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8,6,0,6,0,6,0,6},
-  {7,7,0,0,0,0,0,0,7,8,0,8,0,8,0,8,8,6,4,6,0,6,6,6},
-  {7,7,7,7,0,7,7,7,7,8,8,4,0,6,8,4,8,3,3,3,0,3,3,3},
-  {2,2,2,2,0,2,2,2,2,4,6,4,0,0,6,0,6,3,0,0,0,0,0,3},
-  {2,2,0,0,0,0,0,2,2,4,0,0,0,0,0,0,4,3,0,0,0,0,0,3},
-  {2,0,0,0,0,0,0,0,2,4,0,0,0,0,0,0,4,3,0,0,0,0,0,3},
-  {1,0,0,0,0,0,0,0,1,4,4,4,4,4,6,0,6,3,3,0,0,0,3,3},
-  {2,0,0,0,0,0,0,0,2,2,2,1,2,2,2,6,6,0,0,5,0,5,0,5},
-  {2,2,0,0,0,0,0,2,2,2,0,0,0,2,2,0,5,0,5,0,0,0,5,5},
-  {2,0,0,0,0,0,0,0,2,0,0,0,0,0,2,5,0,5,0,5,0,5,0,5},
-  {1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5},
-  {2,0,0,0,0,0,0,0,2,0,0,0,0,0,2,5,0,5,0,5,0,5,0,5},
-  {2,2,0,0,0,0,0,2,2,2,0,0,0,2,2,0,5,0,5,0,0,0,5,5},
-  {2,2,2,2,1,2,2,2,2,2,2,1,2,2,2,5,5,5,5,5,5,5,5,5}
+  {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 6, 4, 4, 6, 4, 6, 4, 4, 4, 6, 4},
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+  {8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
+  {8, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
+  {8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 4, 6},
+  {8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 6, 0, 0, 0, 0, 0, 6},
+  {7, 7, 7, 7, 9, 7, 7, 7, 7, 0, 8, 0, 8, 0, 8, 0, 8, 4, 0, 4, 0, 6, 0, 6},
+  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6},
+  {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4},
+  {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
+  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6, 0, 6, 6, 6},
+  {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4, 0, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
+  {2, 2, 2, 2, 0, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
+  {2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
+  {1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2, 6, 6, 0, 0, 5, 0, 5, 0, 5},
+  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
+  {1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
+  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
+  {2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5}
 };
 
 struct Sprite
@@ -90,27 +90,27 @@ struct Sprite
 
 Sprite sprite[numSprites] =
 {
-  {20.5, 11.5, 10},
-  {18.5,4.5, 10},
-  {10.0,4.5, 10},
-  {10.0,12.5,10},
-  {3.5, 6.5, 10},
-  {3.5, 20.5,10},
-  {3.5, 14.5,10},
-  {14.5,20.5,10},
+  {20.5, 11.5, 22},
+  {18.5,4.5, 22},
+  {10.0,4.5, 22},
+  {10.0,12.5,22},
+  {3.5, 6.5, 22},
+  {3.5, 20.5,22},
+  {3.5, 14.5,22},
+  {14.5,20.5,22},
 
-  {18.5, 10.5, 9},
-  {18.5, 11.5, 9},
-  {18.5, 12.5, 9},
+  {18.5, 10.5, 21},
+  {18.5, 11.5, 21},
+  {18.5, 12.5, 21},
 
-  {21.5, 1.5, 8},
-  {15.5, 1.5, 8},
-  {16.0, 1.8, 8},
-  {16.2, 1.2, 8},
-  {3.5,  2.5, 8},
-  {9.5, 15.5, 8},
-  {10.0, 15.1,8},
-  {10.5, 15.8,8},
+  {21.5, 1.5, 20},
+  {15.5, 1.5, 20},
+  {16.0, 1.8, 20},
+  {16.2, 1.2, 20},
+  {3.5,  2.5, 20},
+  {9.5, 15.5, 20},
+  {10.0, 15.1,20},
+  {10.5, 15.8,20},
 };
 
 Uint32 buffer[screenHeight][screenWidth]; // y-coordinate first because it works per scanline
@@ -124,6 +124,64 @@ double spriteDistance[numSprites];
 
 //function used to sort the sprites
 void sortSprites(int* order, double* dist, int amount);
+
+#define MAX_DOORS 20
+enum DoorState {closed, opening, open, closing};
+struct Door {
+  int x, y;
+  int counter;
+  DoorState state;
+} doors[MAX_DOORS];
+int numDoors = 0;
+
+void processDoors() {
+  numDoors = 0;
+  for(int x = 0; x < mapWidth; x++) {
+    for(int y = 0; y < mapHeight; y++) {
+      if(worldMap[x][y] == 9) {
+        if(numDoors == MAX_DOORS) {
+          std::cout << "Too many doors!" << std::endl;
+          return;
+        }
+        Door *door = &doors[numDoors++];
+        door->x = x;
+        door->y = y;
+        door->state = closed;
+        door->counter = texWidth;
+      }
+    }
+  }
+}
+
+Door *findDoor(int x, int y) {
+  for(int i = 0; i < numDoors; i++) {
+    Door *door = &doors[i];
+    if(door->x == x && door->y == y) {
+      return door;
+    }
+  }
+  return NULL;
+}
+
+void updateDoors() {
+  for(int i = 0; i < numDoors; i++) {
+    Door *door = &doors[i];
+    switch(door->state) {
+      case opening:
+        if(--door->counter == texWidth/4) {
+          door->state = open;
+        }
+      break;
+      case closing:
+        if(++door->counter == texWidth) {
+          door->state = closed;
+        }
+      break;
+      default: break;
+    }
+  }
+}
+
 
 #if FOG_LEVEL
 Uint32 color_lerp(Uint32 color1, Uint32 color2, double t) {
@@ -155,6 +213,14 @@ Uint32 color_lerp(Uint32 color1, Uint32 color2, double t) {
 }
 #endif
 
+bool canPass(int x, int y) {
+  if(worldMap[x][y] == 9) {
+    Door *door = findDoor(x, y);
+    return (door->state == open);
+  }
+  return worldMap[x][y] == 0;
+}
+
 int main(int /*argc*/, char */*argv*/[])
 {
   double posX = 22.0, posY = 11.5; //x and y start position
@@ -164,7 +230,7 @@ int main(int /*argc*/, char */*argv*/[])
   double time = 0; //time of current frame
   double oldTime = 0; //time of previous frame
 
-  std::vector<Uint32> texture[11];
+  std::vector<Uint32> texture[23];
   for(int i = 0; i < 11; i++) texture[i].resize(texWidth * texHeight);
 
 #if SKYBOX
@@ -183,17 +249,21 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[5], tw, th, "pics/tile3.png");
   error |= loadImage(texture[6], tw, th, "pics/tile4.png");
   error |= loadImage(texture[7], tw, th, "pics/tile5.png");
+  error |= loadImage(texture[8], tw, th, "pics/door.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
-  error |= loadImage(texture[8], tw, th, "pics/altar.png");
-  error |= loadImage(texture[9], tw, th, "pics/fountain.png");
-  error |= loadImage(texture[10], tw, th, "pics/statue.png");
+  error |= loadImage(texture[20], tw, th, "pics/altar.png");
+  error |= loadImage(texture[21], tw, th, "pics/fountain.png");
+  error |= loadImage(texture[22], tw, th, "pics/statue.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 #if SKYBOX
   error |= loadImage(skybox, tw, th, "pics/skybox.png");
   if(error) { std::cout << "error loading skybox" << std::endl; return 1; }
 #endif
+
+  double doorTime = 0;
+  processDoors();
 
   //start the main loop
   while(!done())
@@ -371,6 +441,8 @@ int main(int /*argc*/, char */*argv*/[])
         stepY = 1;
         sideDistY = (mapY + 1.0 - posY) * deltaDistY;
       }
+
+rayscan:
       //perform DDA
       while (hit == 0)
       {
@@ -391,9 +463,33 @@ int main(int /*argc*/, char */*argv*/[])
         if(worldMap[mapX][mapY] > 0) hit = 1;
       }
 
-      //Calculate distance of perpendicular ray (Euclidean distance would give fisheye effect!)
-      if(side == 0) perpWallDist = (sideDistX - deltaDistX);
-      else          perpWallDist = (sideDistY - deltaDistY);
+      //texturing calculations
+      int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
+
+      Door *door = NULL;
+      if(texNum == 8) {
+        /* Door encountered */
+        door = findDoor(mapX, mapY);
+        if(side == 0) {
+          double dist = sideDistX - 0.5;
+          if(sideDistY < dist) {
+            hit = 0;
+            goto rayscan;
+          }
+          perpWallDist = dist;
+        } else {
+          double dist = sideDistY - 0.5;
+          if(sideDistX < dist) {
+            hit = 0;
+            goto rayscan;
+          }
+          perpWallDist = dist;
+        }
+      } else {
+        //Calculate distance of perpendicular ray (Euclidean distance would give fisheye effect!)
+        if(side == 0) perpWallDist = (sideDistX - deltaDistX);
+        else          perpWallDist = (sideDistY - deltaDistY);
+      }
 
       //Calculate height of line to draw on screen
       int lineHeight = (int)(h / perpWallDist);
@@ -401,8 +497,6 @@ int main(int /*argc*/, char */*argv*/[])
       //calculate lowest and highest pixel to fill in current stripe
       int drawStart = -lineHeight / 2 + h / 2;
       int drawEnd = lineHeight / 2 + h / 2;
-      //texturing calculations
-      int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
@@ -412,6 +506,15 @@ int main(int /*argc*/, char */*argv*/[])
 
       //x coordinate on the texture
       int texX = int(wallX * double(texWidth));
+
+      if(door) {
+        texX -= texWidth - door->counter;
+        if(texX < 0) {
+          hit = 0;
+          goto rayscan;
+        }
+      }
+
       if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
       if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
 
@@ -578,6 +681,12 @@ int main(int /*argc*/, char */*argv*/[])
     print(1.0 / frameTime); //FPS counter
     redraw();
 
+    doorTime += frameTime;
+    if(doorTime > 1.0/texWidth) {
+      updateDoors();
+      doorTime -= 1.0/texWidth;
+    }
+
     //speed modifiers
     double moveSpeed = frameTime * 3.0; //the constant value is in squares/second
     double rotSpeed = frameTime * 2.0; //the constant value is in radians/second
@@ -585,14 +694,14 @@ int main(int /*argc*/, char */*argv*/[])
     //move forward if no wall in front of you
     if (keyDown(SDLK_UP))
     {
-      if(worldMap[int(posX + dirX * moveSpeed)][int(posY)] == false) posX += dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY + dirY * moveSpeed)] == false) posY += dirY * moveSpeed;
+      if(canPass(int(posX + dirX * moveSpeed), int(posY))) posX += dirX * moveSpeed;
+      if(canPass(int(posX),int(posY + dirY * moveSpeed))) posY += dirY * moveSpeed;
     }
     //move backwards if no wall behind you
     if(keyDown(SDLK_DOWN))
     {
-      if(worldMap[int(posX - dirX * moveSpeed)][int(posY)] == false) posX -= dirX * moveSpeed;
-      if(worldMap[int(posX)][int(posY - dirY * moveSpeed)] == false) posY -= dirY * moveSpeed;
+      if(canPass(int(posX - dirX * moveSpeed),int(posY))) posX -= dirX * moveSpeed;
+      if(canPass(int(posX),int(posY - dirY * moveSpeed))) posY -= dirY * moveSpeed;
     }
     //rotate to the right
     if(keyDown(SDLK_RIGHT))
@@ -615,6 +724,19 @@ int main(int /*argc*/, char */*argv*/[])
       double oldPlaneX = planeX;
       planeX = planeX * cos(rotSpeed) - planeY * sin(rotSpeed);
       planeY = oldPlaneX * sin(rotSpeed) + planeY * cos(rotSpeed);
+    }
+    if(keyDown(SDLK_SPACE))
+    {
+      int faceX = int(posX + dirX);
+      int faceY = int(posY + dirY);
+      Door *door = findDoor(faceX, faceY);
+      if(door) {
+        switch(door->state) {
+          case closed: door->state = opening; break;
+          case open: door->state = closing; break;
+          default: break;
+        }
+      }
     }
     if(keyDown(SDLK_ESCAPE))
     {

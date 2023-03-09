@@ -44,3 +44,7 @@ While you're at it, you can do the same for the horizontal part of the sprite lo
 commit c1d6246654886222c54d7fccdcbda7f228669b99
 
 # Step 4: Fog effects
+
+commit bb0c927871fbf0d17798a698c4c453b262d15436
+
+# Step 5: Doors
