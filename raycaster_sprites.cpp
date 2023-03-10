@@ -124,6 +124,8 @@ double spriteDistance[numSprites];
 
 double lookVert = 0;
 
+double eyePos = 0;
+
 // lookVert should have values between -LOOK_UP_MAX and LOOK_UP_MAX
 #define LOOK_UP_MAX 128
 
@@ -338,7 +340,7 @@ int main(int /*argc*/, char */*argv*/[])
 
       // Horizontal distance from the camera to the floor for the current row.
       // 0.5 is the z position exactly in the middle between floor and ceiling.
-      float rowDistance = posZ / p;
+      float rowDistance = (posZ + eyePos) / p;
 
       // calculate the real world step vector we have to add for each x (parallel to camera plane)
       // adding step by step avoids multiplications with a weight in the inner loop
@@ -396,7 +398,7 @@ int main(int /*argc*/, char */*argv*/[])
 
       // Horizontal distance from the camera to the floor for the current row.
       // 0.5 is the z position exactly in the middle between floor and ceiling.
-      float rowDistance = posZ / p;
+      float rowDistance = (posZ - eyePos) / p;
 
       // calculate the real world step vector we have to add for each x (parallel to camera plane)
       // adding step by step avoids multiplications with a weight in the inner loop
@@ -538,8 +540,8 @@ rayscan:
       int lineHeight = (int)(h / perpWallDist);
 
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = -lineHeight / 2 + h / 2 + lookVert;
-      int drawEnd = lineHeight / 2 + h / 2 + lookVert;
+      int drawStart = -lineHeight / 2 + h / 2 + lookVert + eyePos/perpWallDist;
+      int drawEnd = lineHeight / 2 + h / 2 + lookVert + eyePos/perpWallDist;
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
@@ -644,8 +646,8 @@ rayscan:
       //calculate height of the sprite on screen
       int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert;
-      int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert;
+      int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
+      int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
 
       //calculate width of the sprite
       int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
@@ -802,6 +804,30 @@ rayscan:
         lookVert += frameTime * 400;
         if(lookVert > 0)
           lookVert = 0;
+      }
+    }
+    if(keyDown(SDLK_x)) {
+      if(eyePos == 0)
+        eyePos = 128;
+    } else if(keyDown(SDLK_c)) {
+      if(eyePos <= 0 && eyePos > -128) {
+        eyePos -= frameTime * 400;
+        if(eyePos < -128) {
+          eyePos = -128;
+        }
+      }
+    } else {
+      if(eyePos < 0) {
+        eyePos += frameTime * 400;
+        if(eyePos > 0) {
+          eyePos = 0;
+        }
+      }
+    }
+    if(eyePos > 0) {
+      eyePos -= frameTime * 400;
+      if(eyePos < 0) {
+        eyePos = 0;
       }
     }
     if(keyDown(SDLK_ESCAPE))

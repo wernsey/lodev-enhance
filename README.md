@@ -50,3 +50,10 @@ commit bb0c927871fbf0d17798a698c4c453b262d15436
 # Step 5: Doors
 
 commit f5980c0319457d9fc188d3ac40d5f0643f586973
+
+# Step 6: Look up and down
+
+commit 0ef7d398abb09a70e6952e61d83cc6d2b70f29b7
+
+# Step 7: Jump and crouch
+
