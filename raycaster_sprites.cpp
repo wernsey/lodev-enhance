@@ -122,6 +122,11 @@ double ZBuffer[screenWidth];
 int spriteOrder[numSprites];
 double spriteDistance[numSprites];
 
+double lookVert = 0;
+
+// lookVert should have values between -LOOK_UP_MAX and LOOK_UP_MAX
+#define LOOK_UP_MAX 128
+
 //function used to sort the sprites
 void sortSprites(int* order, double* dist, int amount);
 
@@ -287,8 +292,10 @@ int main(int /*argc*/, char */*argv*/[])
       }
 
       int dtexX = texX1 - texX0;
-      int dy = h/2;
-      int dtexY = SKYBOX_HEIGHT - 1;
+      int dy = h/2 + lookVert;
+      int dtexY = SKYBOX_HEIGHT * (h/2 + lookVert) / (h/2 + LOOK_UP_MAX) - 1;
+      int texY0 = SKYBOX_HEIGHT - 1 - dtexY;
+
       for(int x = 0, cX = 0; x < w; x++) {
 
           if(texX0 >= SKYBOX_WIDTH) {
@@ -296,7 +303,7 @@ int main(int /*argc*/, char */*argv*/[])
           } else
               texX = texX0;
 
-          for(int y = 0, texY = 0, cY = 0; y < dy; y++) {
+          for(int y = 0, texY = texY0, cY = 0; y < dy; y++) {
 
               Uint32 color = skybox[SKYBOX_WIDTH * texY + texX];
               buffer[y][x] = color;
@@ -318,16 +325,13 @@ int main(int /*argc*/, char */*argv*/[])
 #endif
 
     //FLOOR CASTING
-    for(int y = screenHeight / 2 + 1; y < screenHeight; ++y)
+    for(int y = screenHeight / 2 + lookVert + 1, p = 1; y < screenHeight; ++y, ++p)
     {
       // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
       float rayDirX0 = dirX - planeX;
       float rayDirY0 = dirY - planeY;
       float rayDirX1 = dirX + planeX;
       float rayDirY1 = dirY + planeY;
-
-      // Current y position compared to the center of the screen (the horizon)
-      int p = y - screenHeight / 2;
 
       // Vertical position of the camera.
       float posZ = 0.5 * screenHeight;
@@ -367,30 +371,69 @@ int main(int /*argc*/, char */*argv*/[])
         int floorTexture;
         if(checkerBoardPattern == 0) floorTexture = 3;
         else floorTexture = 4;
-#if !SKYBOX
-        int ceilingTexture = 6;
-#endif
-        Uint32 color;
 
-        // floor
-        color = texture[floorTexture][texWidth * ty + tx];
+        Uint32 color = texture[floorTexture][texWidth * ty + tx];
         color = (color >> 1) & 8355711; // make a bit darker
 #if FOG_LEVEL
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
         buffer[y][x] = color;
+      }
+    }
 
 #if !SKYBOX
-        //ceiling (symmetrical, at screenHeight - y - 1 instead of y)
-        color = texture[ceilingTexture][texWidth * ty + tx];
+    //CEILING CASTING
+    for(int y = screenHeight / 2 + lookVert + 1, p = 1; y >= 0; y--, ++p)
+    {
+      // rayDir for leftmost ray (x = 0) and rightmost ray (x = w)
+      float rayDirX0 = dirX - planeX;
+      float rayDirY0 = dirY - planeY;
+      float rayDirX1 = dirX + planeX;
+      float rayDirY1 = dirY + planeY;
+
+      // Vertical position of the camera.
+      float posZ = 0.5 * screenHeight;
+
+      // Horizontal distance from the camera to the floor for the current row.
+      // 0.5 is the z position exactly in the middle between floor and ceiling.
+      float rowDistance = posZ / p;
+
+      // calculate the real world step vector we have to add for each x (parallel to camera plane)
+      // adding step by step avoids multiplications with a weight in the inner loop
+      float floorStepX = rowDistance * (rayDirX1 - rayDirX0) / screenWidth;
+      float floorStepY = rowDistance * (rayDirY1 - rayDirY0) / screenWidth;
+
+      // real world coordinates of the leftmost column. This will be updated as we step to the right.
+      float floorX = posX + rowDistance * rayDirX0;
+      float floorY = posY + rowDistance * rayDirY0;
+
+#if FOG_LEVEL
+      double fog = rowDistance / FOG_CONSTANT * FOG_LEVEL;
+#endif
+      for(int x = 0; x < screenWidth; ++x)
+      {
+        // the cell coord is simply got from the integer parts of floorX and floorY
+        int cellX = (int)(floorX);
+        int cellY = (int)(floorY);
+
+        // get the texture coordinate from the fractional part
+        int tx = (int)(texWidth * (floorX - cellX)) & (texWidth - 1);
+        int ty = (int)(texHeight * (floorY - cellY)) & (texHeight - 1);
+
+        floorX += floorStepX;
+        floorY += floorStepY;
+
+        // choose texture and draw the pixel
+        int ceilingTexture = 6;
+        Uint32 color = texture[ceilingTexture][texWidth * ty + tx];
         color = (color >> 1) & 8355711; // make a bit darker
 #if FOG_LEVEL
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
-        buffer[screenHeight - y - 1][x] = color;
-#endif
+        buffer[y][x] = color;
       }
     }
+#endif
 
     // WALL CASTING
     for(int x = 0; x < w; x++)
@@ -495,8 +538,8 @@ rayscan:
       int lineHeight = (int)(h / perpWallDist);
 
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStart = -lineHeight / 2 + h / 2;
-      int drawEnd = lineHeight / 2 + h / 2;
+      int drawStart = -lineHeight / 2 + h / 2 + lookVert;
+      int drawEnd = lineHeight / 2 + h / 2 + lookVert;
 
       //calculate value of wallX
       double wallX; //where exactly the wall was hit
@@ -601,8 +644,8 @@ rayscan:
       //calculate height of the sprite on screen
       int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
       //calculate lowest and highest pixel to fill in current stripe
-      int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen;
-      int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen;
+      int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert;
+      int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert;
 
       //calculate width of the sprite
       int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
@@ -736,6 +779,29 @@ rayscan:
           case open: door->state = closing; break;
           default: break;
         }
+      }
+    }
+    if(keyDown(SDLK_q)) {
+      if(lookVert < LOOK_UP_MAX) {
+        lookVert += frameTime * 600;
+        if(lookVert > LOOK_UP_MAX)
+          lookVert = LOOK_UP_MAX;
+      }
+    } else if(keyDown(SDLK_a)) {
+      if(lookVert > -LOOK_UP_MAX) {
+        lookVert -= frameTime * 600;
+        if(lookVert < -LOOK_UP_MAX)
+          lookVert = -LOOK_UP_MAX;
+      }
+    } else {
+      if(lookVert > 0) {
+        lookVert -= frameTime * 400;
+        if(lookVert < 0)
+          lookVert = 0;
+      } else if(lookVert < 0) {
+        lookVert += frameTime * 400;
+        if(lookVert > 0)
+          lookVert = 0;
       }
     }
     if(keyDown(SDLK_ESCAPE))
