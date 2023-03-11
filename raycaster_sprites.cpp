@@ -24,6 +24,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <cmath>
 #include <string>
 #include <vector>
+#include <stack>
 #include <iostream>
 
 #include "quickcg.h"
@@ -33,7 +34,6 @@ using namespace QuickCG;
 g++ *.cpp -lSDL -O3 -W -Wall -ansi -pedantic
 g++ *.cpp -lSDL
 */
-
 
 #define screenWidth 640
 #define screenHeight 480
@@ -54,17 +54,17 @@ g++ *.cpp -lSDL
 int worldMap[mapWidth][mapHeight] =
 {
   {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 6, 4, 4, 6, 4, 6, 4, 4, 4, 6, 4},
-  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
-  {8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
-  {8, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
-  {8, 0, 3, 3, 0, 0, 0, 0, 0, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
-  {8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 4, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 4, 6},
+  {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
+  {8, 0, 0, 3, 0, 0, 0, 0,10, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
+  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+  {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 4, 6},
   {8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 6, 0, 0, 0, 0, 0, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 0, 8, 0, 8, 0, 8, 0, 8, 4, 0, 4, 0, 6, 0, 6},
   {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6},
   {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4},
   {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
-  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6, 0, 6, 6, 6},
+  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6,10, 6, 6, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4, 0, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
   {2, 2, 2, 2, 0, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
   {2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
@@ -73,9 +73,9 @@ int worldMap[mapWidth][mapHeight] =
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2, 6, 6, 0, 0, 5, 0, 5, 0, 5},
   {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
-  {1, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5},
-  {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
-  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
+  {1,11, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+  {2, 0,11, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
+  {2, 2, 1, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
   {2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5}
 };
 
@@ -115,8 +115,8 @@ Sprite sprite[numSprites] =
 
 Uint32 buffer[screenHeight][screenWidth]; // y-coordinate first because it works per scanline
 
-//1D Zbuffer
-double ZBuffer[screenWidth];
+//2D Zbuffer
+double ZBuffer[screenHeight][screenWidth];
 
 //arrays used to sort the sprites
 int spriteOrder[numSprites];
@@ -224,8 +224,61 @@ bool canPass(int x, int y) {
   if(worldMap[x][y] == 9) {
     Door *door = findDoor(x, y);
     return (door->state == open);
-  }
+  } else if(worldMap[x][y] == 10)
+    return true;
+
   return worldMap[x][y] == 0;
+}
+
+struct Strip {
+  int x;
+  int drawStart, drawEnd;
+  double perpWallDist;
+  std::vector<Uint32> &texture;
+  int texX;
+  double fog;
+  int side;
+};
+
+void drawStrip(struct Strip &strip) {
+  // Draw the vertical strip
+  int texY = 0, c = 0;
+  int dy = strip.drawEnd - strip.drawStart;
+
+  if(strip.drawStart < 0) {
+      c = -strip.drawStart * texHeight;
+      if(c > dy) {
+          div_t res = div(c, dy);
+          texY += res.quot;
+          c = res.rem;
+      }
+      strip.drawStart = 0;
+  }
+  if(strip.drawEnd >= h)
+    strip.drawEnd = (h-1);
+
+  for(int y = strip.drawStart; y <= strip.drawEnd; y++) {
+
+    Uint32 color = strip.texture[texHeight * texY + strip.texX];
+
+    if((color & 0xFF000000) != 0) {
+      //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
+      if(strip.side == 1) color = (color >> 1) & 8355711;
+
+#if FOG_LEVEL
+      color = color_lerp(color, FOG_COLOR, strip.fog);
+#endif
+      buffer[y][strip.x] = color;
+
+      ZBuffer[y][strip.x] = strip.perpWallDist;
+    }
+
+    c += texHeight;
+    while(c > dy) {
+      texY++;
+      c -= dy;
+    }
+  }
 }
 
 int main(int /*argc*/, char */*argv*/[])
@@ -257,6 +310,8 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[6], tw, th, "pics/tile4.png");
   error |= loadImage(texture[7], tw, th, "pics/tile5.png");
   error |= loadImage(texture[8], tw, th, "pics/door.png");
+  error |= loadImage(texture[9], tw, th, "pics/entry.png");
+  error |= loadImage(texture[10], tw, th, "pics/gate.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
@@ -309,6 +364,7 @@ int main(int /*argc*/, char */*argv*/[])
 
               Uint32 color = skybox[SKYBOX_WIDTH * texY + texX];
               buffer[y][x] = color;
+              ZBuffer[y][x] = INFINITY;
 
               cY = cY + dtexY;
               while(cY > dy) {
@@ -380,6 +436,7 @@ int main(int /*argc*/, char */*argv*/[])
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
         buffer[y][x] = color;
+        ZBuffer[y][x] = INFINITY;
       }
     }
 
@@ -433,11 +490,13 @@ int main(int /*argc*/, char */*argv*/[])
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
         buffer[y][x] = color;
+        ZBuffer[y][x] = INFINITY;
       }
     }
 #endif
 
     // WALL CASTING
+    std::stack<Strip> stack;
     for(int x = 0; x < w; x++)
     {
       //calculate ray position and direction
@@ -512,9 +571,10 @@ rayscan:
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       Door *door = NULL;
-      if(texNum == 8) {
-        /* Door encountered */
-        door = findDoor(mapX, mapY);
+      if(texNum == 8 || texNum == 9 || texNum == 10) {
+        /* Sunken wall encountered */
+        if(texNum == 8)
+          door = findDoor(mapX, mapY); /* Door encountered */
         if(side == 0) {
           double dist = sideDistX - 0.5;
           if(sideDistY < dist) {
@@ -563,46 +623,24 @@ rayscan:
       if(side == 0 && rayDirX > 0) texX = texWidth - texX - 1;
       if(side == 1 && rayDirY < 0) texX = texWidth - texX - 1;
 
-      // Draw the vertical strip
-      int texY = 0, c = 0;
-      int dy = drawEnd - drawStart;
-
-      if(drawStart < 0) {
-          c = -drawStart * texHeight;
-          if(c > dy) {
-              div_t res = div(c, dy);
-              texY += res.quot;
-              c = res.rem;
-          }
-          drawStart = 0;
-      }
-      if(drawEnd >= h)
-        drawEnd = (h-1);
-
 #if FOG_LEVEL
       double fog = perpWallDist / FOG_CONSTANT * FOG_LEVEL;
 #endif
 
-      for(int y = drawStart; y <= drawEnd; y++) {
+      Strip strip = {
+        x, drawStart, drawEnd, perpWallDist, texture[texNum], texX, fog, side
+      };
+      stack.push(strip);
 
-        Uint32 color = texture[texNum][texHeight * texY + texX];
-        //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
-        if(side == 1) color = (color >> 1) & 8355711;
-
-#if FOG_LEVEL
-        color = color_lerp(color, FOG_COLOR, fog);
-#endif
-        buffer[y][x] = color;
-
-        c += texHeight;
-        while(c > dy) {
-          texY++;
-          c -= dy;
-        }
+      if(texNum == 9 || texNum == 10) {
+        hit = 0;
+        goto rayscan;
       }
 
-      //SET THE ZBUFFER FOR THE SPRITE CASTING
-      ZBuffer[x] = perpWallDist; //perpendicular distance is used
+      while(!stack.empty()) {
+        drawStrip(stack.top());
+        stack.pop();
+      }
     }
 
     //SPRITE CASTING
@@ -687,11 +725,11 @@ rayscan:
 #endif
 
       for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
-        if(transformY < ZBuffer[stripe])
-        {
-          int texY = texY0, cY = cY0;
-          for(int y = drawStartY; y <= drawEndY; y++) {
 
+        int texY = texY0, cY = cY0;
+        for(int y = drawStartY; y <= drawEndY; y++) {
+
+          if(transformY < ZBuffer[y][stripe]) {
             Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
             if((color & 0x00FFFFFF) != 0) {
 #if FOG_LEVEL
@@ -699,12 +737,12 @@ rayscan:
 #endif
               buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
             }
+          }
 
-            cY = cY + texHeight;
-            while(cY > dY) {
-              texY++;
-              cY -= dY;
-            }
+          cY = cY + texHeight;
+          while(cY > dY) {
+            texY++;
+            cY -= dY;
           }
         }
 
