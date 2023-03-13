@@ -122,6 +122,12 @@ double ZBuffer[screenHeight][screenWidth];
 int spriteOrder[numSprites];
 double spriteDistance[numSprites];
 
+double posX = 22.0, posY = 11.5; //x and y start position
+double dirX = -1.0, dirY = 0.0; //initial direction vector
+double planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
+
+std::vector<Uint32> texture[23];
+
 double lookVert = 0;
 
 double eyePos = 0;
@@ -283,16 +289,124 @@ void drawStrip(Strip &strip) {
   }
 }
 
+void drawSprites() {
+  //SPRITE CASTING
+  //sort sprites from far to close
+  for(int i = 0; i < numSprites; i++)
+  {
+    spriteOrder[i] = i;
+    spriteDistance[i] = ((posX - sprite[i].x) * (posX - sprite[i].x) + (posY - sprite[i].y) * (posY - sprite[i].y)); //sqrt not taken, unneeded
+  }
+  sortSprites(spriteOrder, spriteDistance, numSprites);
+
+  //after sorting the sprites, do the projection and draw them
+  for(int i = 0; i < numSprites; i++)
+  {
+    //translate sprite position to relative to camera
+    double spriteX = sprite[spriteOrder[i]].x - posX;
+    double spriteY = sprite[spriteOrder[i]].y - posY;
+
+    //transform sprite with the inverse camera matrix
+    // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
+    // [               ]       =  1/(planeX*dirY-dirX*planeY) *   [                 ]
+    // [ planeY   dirY ]                                          [ -planeY  planeX ]
+
+    double invDet = 1.0 / (planeX * dirY - dirX * planeY); //required for correct matrix multiplication
+
+    double transformX = invDet * (dirY * spriteX - dirX * spriteY);
+    double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
+
+    if(transformY < 0) continue;
+
+    int spriteScreenX = int((w / 2) * (1 + transformX / transformY));
+
+    //parameters for scaling and moving the sprites
+    #define uDiv 2
+    #define vDiv 2
+    // Note that vMove is 128 rather than 64 to get the sprites on the ground.
+    // It's because the textures are 32x32, rather than 64x64 as in the original.
+    #define vMove 128.0
+    int vMoveScreen = int(vMove / transformY);
+
+    //calculate height of the sprite on screen
+    int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
+    //calculate lowest and highest pixel to fill in current stripe
+    int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
+    int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
+
+    //calculate width of the sprite
+    int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
+    int drawStartX = -spriteWidth / 2 + spriteScreenX;
+    int drawEndX = spriteWidth / 2 + spriteScreenX;
+
+    // Precompute some variables for the vertical strips
+    int dY = drawEndY - drawStartY;
+    int cY0 = 0, texY0 = 0;
+    if(drawStartY < 0) {
+        cY0 = -drawStartY * texHeight;
+        if(cY0 > dY) {
+            div_t res = div(cY0, dY);
+            texY0 += res.quot;
+            cY0 = res.rem;
+        }
+        drawStartY = 0;
+    }
+    if(drawEndY >= h)
+      drawEndY = (h-1);
+
+    int texX = 0, dX = drawEndX - drawStartX, cX = 0;
+
+    if(drawStartX < 0) {
+        cX = -drawStartX * texWidth;
+        if(cX > dX) {
+            div_t res = div(cX, dX);
+            texX += res.quot;
+            cX = res.rem;
+        }
+        drawStartX = 0;
+    }
+    if(drawEndX > w) drawEndX = w;
+
+#if FOG_LEVEL
+    double fog = transformY / FOG_CONSTANT * FOG_LEVEL;
+#endif
+
+    for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
+
+      int texY = texY0, cY = cY0;
+      for(int y = drawStartY; y <= drawEndY; y++) {
+
+        if(transformY < ZBuffer[y][stripe]) {
+          Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
+          if((color & 0x00FFFFFF) != 0) {
+#if FOG_LEVEL
+            color = color_lerp(color, FOG_COLOR, fog);
+#endif
+            buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
+          }
+        }
+
+        cY = cY + texHeight;
+        while(cY > dY) {
+          texY++;
+          cY -= dY;
+        }
+      }
+
+      cX += texWidth;
+      while(cX > dX) {
+        texX++;
+        cX -= dX;
+      }
+    }
+  }
+}
+
 int main(int /*argc*/, char */*argv*/[])
 {
-  double posX = 22.0, posY = 11.5; //x and y start position
-  double dirX = -1.0, dirY = 0.0; //initial direction vector
-  double planeX = 0.0, planeY = 0.66; //the 2d raycaster version of camera plane
-
   double time = 0; //time of current frame
   double oldTime = 0; //time of previous frame
 
-  std::vector<Uint32> texture[23];
   for(int i = 0; i < 11; i++) texture[i].resize(texWidth * texHeight);
 
 #if SKYBOX
@@ -648,116 +762,7 @@ rayscan:
       }
     }
 
-    //SPRITE CASTING
-    //sort sprites from far to close
-    for(int i = 0; i < numSprites; i++)
-    {
-      spriteOrder[i] = i;
-      spriteDistance[i] = ((posX - sprite[i].x) * (posX - sprite[i].x) + (posY - sprite[i].y) * (posY - sprite[i].y)); //sqrt not taken, unneeded
-    }
-    sortSprites(spriteOrder, spriteDistance, numSprites);
-
-    //after sorting the sprites, do the projection and draw them
-    for(int i = 0; i < numSprites; i++)
-    {
-      //translate sprite position to relative to camera
-      double spriteX = sprite[spriteOrder[i]].x - posX;
-      double spriteY = sprite[spriteOrder[i]].y - posY;
-
-      //transform sprite with the inverse camera matrix
-      // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
-      // [               ]       =  1/(planeX*dirY-dirX*planeY) *   [                 ]
-      // [ planeY   dirY ]                                          [ -planeY  planeX ]
-
-      double invDet = 1.0 / (planeX * dirY - dirX * planeY); //required for correct matrix multiplication
-
-      double transformX = invDet * (dirY * spriteX - dirX * spriteY);
-      double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
-
-      if(transformY < 0) continue;
-
-      int spriteScreenX = int((w / 2) * (1 + transformX / transformY));
-
-      //parameters for scaling and moving the sprites
-      #define uDiv 2
-      #define vDiv 2
-      // Note that vMove is 128 rather than 64 to get the sprites on the ground.
-      // It's because the textures are 32x32, rather than 64x64 as in the original.
-      #define vMove 128.0
-      int vMoveScreen = int(vMove / transformY);
-
-      //calculate height of the sprite on screen
-      int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
-      //calculate lowest and highest pixel to fill in current stripe
-      int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
-      int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
-
-      //calculate width of the sprite
-      int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
-      int drawStartX = -spriteWidth / 2 + spriteScreenX;
-      int drawEndX = spriteWidth / 2 + spriteScreenX;
-
-      // Precompute some variables for the vertical strips
-      int dY = drawEndY - drawStartY;
-      int cY0 = 0, texY0 = 0;
-      if(drawStartY < 0) {
-          cY0 = -drawStartY * texHeight;
-          if(cY0 > dY) {
-              div_t res = div(cY0, dY);
-              texY0 += res.quot;
-              cY0 = res.rem;
-          }
-          drawStartY = 0;
-      }
-      if(drawEndY >= h)
-        drawEndY = (h-1);
-
-      int texX = 0, dX = drawEndX - drawStartX, cX = 0;
-
-      if(drawStartX < 0) {
-          cX = -drawStartX * texWidth;
-          if(cX > dX) {
-              div_t res = div(cX, dX);
-              texX += res.quot;
-              cX = res.rem;
-          }
-          drawStartX = 0;
-      }
-      if(drawEndX > w) drawEndX = w;
-
-#if FOG_LEVEL
-      double fog = transformY / FOG_CONSTANT * FOG_LEVEL;
-#endif
-
-      for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
-
-        int texY = texY0, cY = cY0;
-        for(int y = drawStartY; y <= drawEndY; y++) {
-
-          if(transformY < ZBuffer[y][stripe]) {
-            Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
-            if((color & 0x00FFFFFF) != 0) {
-#if FOG_LEVEL
-              color = color_lerp(color, FOG_COLOR, fog);
-#endif
-              buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
-            }
-          }
-
-          cY = cY + texHeight;
-          while(cY > dY) {
-            texY++;
-            cY -= dY;
-          }
-        }
-
-        cX += texWidth;
-        while(cX > dX) {
-          texX++;
-          cX -= dX;
-        }
-      }
-    }
+    drawSprites();
 
     drawBuffer(buffer[0]);
     // No need to clear the screen here, since everything is overdrawn with floor and ceiling
