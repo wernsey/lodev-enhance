@@ -71,10 +71,10 @@ int worldMap[mapWidth][mapHeight] =
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
   {1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2, 6, 6, 0, 0, 5, 0, 5, 0, 5},
-  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
-  {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
-  {1,11, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
-  {2, 0,11, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5, 0, 5, 0, 5, 0, 5, 0, 5},
+  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
+  {1,12, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
+  {2, 0,11, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
   {2, 2, 1, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
   {2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5}
 };
@@ -189,7 +189,6 @@ void updateDoors() {
   }
 }
 
-
 #if FOG_LEVEL
 Uint32 color_lerp(Uint32 color1, Uint32 color2, double t) {
 
@@ -224,9 +223,8 @@ bool canPass(int x, int y) {
   if(worldMap[x][y] == 9) {
     Door *door = findDoor(x, y);
     return (door->state == open);
-  } else if(worldMap[x][y] == 10)
+  } else if(worldMap[x][y] == 10 || worldMap[x][y] == 13)
     return true;
-
   return worldMap[x][y] == 0;
 }
 
@@ -238,9 +236,10 @@ struct Strip {
   int texX;
   double fog;
   int side;
+  bool seeThrough;
 };
 
-void drawStrip(struct Strip &strip) {
+void drawStrip(Strip &strip) {
   // Draw the vertical strip
   int texY = 0, c = 0;
   int dy = strip.drawEnd - strip.drawStart;
@@ -268,6 +267,9 @@ void drawStrip(struct Strip &strip) {
 #if FOG_LEVEL
       color = color_lerp(color, FOG_COLOR, strip.fog);
 #endif
+      if(strip.seeThrough)
+        color = ((color & 0xFEFEFE) >> 1) + ((buffer[y][strip.x] & 0xFEFEFE) >> 1);
+
       buffer[y][strip.x] = color;
 
       ZBuffer[y][strip.x] = strip.perpWallDist;
@@ -312,6 +314,8 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[8], tw, th, "pics/door.png");
   error |= loadImage(texture[9], tw, th, "pics/entry.png");
   error |= loadImage(texture[10], tw, th, "pics/gate.png");
+  error |= loadImage(texture[11], tw, th, "pics/glass.png");
+  error |= loadImage(texture[12], tw, th, "pics/glass-break.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
@@ -571,7 +575,7 @@ rayscan:
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       Door *door = NULL;
-      if(texNum == 8 || texNum == 9 || texNum == 10) {
+      if(texNum == 8 || texNum == 9 || texNum == 10 || texNum == 11 || texNum == 12) {
         /* Sunken wall encountered */
         if(texNum == 8)
           door = findDoor(mapX, mapY); /* Door encountered */
@@ -628,11 +632,12 @@ rayscan:
 #endif
 
       Strip strip = {
-        x, drawStart, drawEnd, perpWallDist, texture[texNum], texX, fog, side
+        x, drawStart, drawEnd, perpWallDist, texture[texNum], texX, fog, side,
+        texNum == 11 || texNum == 12
       };
       stack.push(strip);
 
-      if(texNum == 9 || texNum == 10) {
+      if(texNum == 9 || texNum == 10 || texNum == 11 || texNum == 12) {
         hit = 0;
         goto rayscan;
       }
@@ -819,6 +824,8 @@ rayscan:
           case open: door->state = closing; break;
           default: break;
         }
+      } else if(worldMap[faceX][faceY] == 12) {
+        worldMap[faceX][faceY] = 13;
       }
     }
     if(keyDown(SDLK_q)) {

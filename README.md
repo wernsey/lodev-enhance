@@ -57,3 +57,10 @@ commit 0ef7d398abb09a70e6952e61d83cc6d2b70f29b7
 
 # Step 7: Jump and crouch
 
+commit 61224aa5a8c08def242fb696b6947d0d12ffd35b
+
+# Step 8: Walls with Transparency
+
+commit 1940b5c13ca01b096249729e97733f27571d1c9f
+
+# Step 9: Glass windows
