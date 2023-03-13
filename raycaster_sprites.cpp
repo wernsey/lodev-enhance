@@ -86,7 +86,7 @@ struct Sprite
   int texture;
 };
 
-#define numSprites 22
+#define numSprites 23
 
 Sprite sprite[numSprites] =
 {
@@ -105,6 +105,7 @@ Sprite sprite[numSprites] =
   {18.5, 11.5, 21},
   {18.5, 12.5, 21},
   { 1.5,  9.5, 21},
+  { 5.5,  9.5, 21},
 
   {21.5, 1.5, 20},
   {15.5, 1.5, 20},
@@ -117,9 +118,6 @@ Sprite sprite[numSprites] =
 };
 
 Uint32 buffer[screenHeight][screenWidth]; // y-coordinate first because it works per scanline
-
-//2D Zbuffer
-double ZBuffer[screenHeight][screenWidth];
 
 double posX = 22.0, posY = 11.5; //x and y start position
 double dirX = -1.0, dirY = 0.0; //initial direction vector
@@ -276,8 +274,6 @@ void drawStrip(Strip &strip) {
         color = ((color & 0xFEFEFE) >> 1) + ((buffer[y][strip.x] & 0xFEFEFE) >> 1);
 
       buffer[y][strip.x] = color;
-
-      ZBuffer[y][strip.x] = strip.perpWallDist;
     }
 
     c += texHeight;
@@ -298,7 +294,7 @@ struct SpritePrepare {
   double fog;
 };
 
-bool prepsSort (SpritePrepare &i, SpritePrepare &j) { return (i.transformY > j.transformY); }
+bool prepsSort (SpritePrepare &i, SpritePrepare &j) { return (i.transformY < j.transformY); }
 
 std::vector<SpritePrepare> preps;
 
@@ -393,41 +389,44 @@ void prepareSprites() {
   std::sort(preps.begin(), preps.end(), prepsSort);
 }
 
-void drawSprites() {
+void drawSpriteStrip(SpritePrepare &prep, int stripe) {
 
-  //after sorting the sprites, do the projection and draw them
-  for(unsigned int i = 0; i < preps.size(); i++)
-  {
-    SpritePrepare &prep = preps[i];
+  if(stripe < prep.drawStartX || stripe >= prep.drawEndX)
+    return;
 
-    for(int stripe = prep.drawStartX; stripe < prep.drawEndX; stripe++) {
+  // If the left side of the sprite is concealed by a wall
+  // then we need to adjust texX accordingly.
+  int delta = stripe - prep.drawStartX;
+  if(delta) {
+      prep.drawStartX += delta;
+      div_t res = div(prep.cX + delta * texWidth, prep.dX);
+      prep.texX += res.quot;
+      prep.cX = res.rem;
+  }
 
-      int texY = prep.texY0, cY = prep.cY0;
-      for(int y = prep.drawStartY; y <= prep.drawEndY; y++) {
+  int texY = prep.texY0, cY = prep.cY0;
+  for(int y = prep.drawStartY; y <= prep.drawEndY; y++) {
 
-        if(prep.transformY < ZBuffer[y][stripe]) {
-          Uint32 color = texture[prep.texNum][texWidth * texY + prep.texX]; //get current color from the texture
-          if((color & 0x00FFFFFF) != 0) {
+    Uint32 color = texture[prep.texNum][texWidth * texY + prep.texX]; //get current color from the texture
+    if((color & 0x00FFFFFF) != 0) {
 #if FOG_LEVEL
-            color = color_lerp(color, FOG_COLOR, prep.fog);
+      color = color_lerp(color, FOG_COLOR, prep.fog);
 #endif
-            buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
-          }
-        }
-
-        cY = cY + texHeight;
-        while(cY > prep.dY) {
-          texY++;
-          cY -= prep.dY;
-        }
-      }
-
-      prep.cX += texWidth;
-      while(prep.cX > prep.dX) {
-        prep.texX++;
-        prep.cX -= prep.dX;
-      }
+      buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
     }
+
+    cY = cY + texHeight;
+    while(cY > prep.dY) {
+      texY++;
+      cY -= prep.dY;
+    }
+  }
+
+  prep.drawStartX++;
+  prep.cX += texWidth;
+  while(prep.cX > prep.dX) {
+    prep.texX++;
+    prep.cX -= prep.dX;
   }
 }
 
@@ -511,7 +510,6 @@ int main(int /*argc*/, char */*argv*/[])
 
               Uint32 color = skybox[SKYBOX_WIDTH * texY + texX];
               buffer[y][x] = color;
-              ZBuffer[y][x] = INFINITY;
 
               cY = cY + dtexY;
               while(cY > dy) {
@@ -583,7 +581,6 @@ int main(int /*argc*/, char */*argv*/[])
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
         buffer[y][x] = color;
-        ZBuffer[y][x] = INFINITY;
       }
     }
 
@@ -637,7 +634,6 @@ int main(int /*argc*/, char */*argv*/[])
         color = color_lerp(color, FOG_COLOR, fog);
 #endif
         buffer[y][x] = color;
-        ZBuffer[y][x] = INFINITY;
       }
     }
 #endif
@@ -787,13 +783,30 @@ rayscan:
         goto rayscan;
       }
 
+      // Tracks the furthest sprite we haven't drawn yet
+      int farSprite = preps.size() - 1;
+
+      // Skip sprites behind the furthest wall
+      // note perpWallDist == stack.top().perpWallDist
+      while(farSprite >= 0 && preps[farSprite].transformY > perpWallDist)
+        farSprite--;
+
       while(!stack.empty()) {
-        drawStrip(stack.top());
+        Strip &strip = stack.top();
+
+        // Draw any sprites behind the wall strip we're currently drawing
+        while(farSprite >= 0 && preps[farSprite].transformY > strip.perpWallDist) {
+          drawSpriteStrip(preps[farSprite--], x);
+        }
+
+        // Now draw the strip itself
+        drawStrip(strip);
         stack.pop();
       }
+      // Draw sprites in front of the nearest wall:
+      while(farSprite >= 0)
+        drawSpriteStrip(preps[farSprite--], x);
     }
-
-    drawSprites();
 
     drawBuffer(buffer[0]);
     // No need to clear the screen here, since everything is overdrawn with floor and ceiling
