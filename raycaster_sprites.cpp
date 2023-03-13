@@ -54,7 +54,7 @@ g++ *.cpp -lSDL
 int worldMap[mapWidth][mapHeight] =
 {
   {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 6, 4, 4, 6, 4, 6, 4, 4, 4, 6, 4},
-  {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
+  {8, 0, 0, 0, 0, 0, 0, 0,12, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
   {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
   {8, 0, 0, 3, 0, 0, 0, 0,10, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
   {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
@@ -65,12 +65,12 @@ int worldMap[mapWidth][mapHeight] =
   {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4},
   {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
   {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6,10, 6, 6, 6},
-  {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4, 0, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
+  {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4,12, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
   {2, 2, 2, 2, 0, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
   {2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
   {1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
-  {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2, 6, 6, 0, 0, 5, 0, 5, 0, 5},
+  {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2,12, 6, 0, 0, 5, 0, 5, 0, 5},
   {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
   {1,12, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
@@ -86,10 +86,11 @@ struct Sprite
   int texture;
 };
 
-#define numSprites 19
+#define numSprites 22
 
 Sprite sprite[numSprites] =
 {
+  {20.5, 10.5, 22},
   {20.5, 11.5, 22},
   {18.5,4.5, 22},
   {10.0,4.5, 22},
@@ -98,10 +99,12 @@ Sprite sprite[numSprites] =
   {3.5, 20.5,22},
   {3.5, 14.5,22},
   {14.5,20.5,22},
+  {17.5,18.5,22},
 
   {18.5, 10.5, 21},
   {18.5, 11.5, 21},
   {18.5, 12.5, 21},
+  { 1.5,  9.5, 21},
 
   {21.5, 1.5, 20},
   {15.5, 1.5, 20},
@@ -117,10 +120,6 @@ Uint32 buffer[screenHeight][screenWidth]; // y-coordinate first because it works
 
 //2D Zbuffer
 double ZBuffer[screenHeight][screenWidth];
-
-//arrays used to sort the sprites
-int spriteOrder[numSprites];
-double spriteDistance[numSprites];
 
 double posX = 22.0, posY = 11.5; //x and y start position
 double dirX = -1.0, dirY = 0.0; //initial direction vector
@@ -289,22 +288,32 @@ void drawStrip(Strip &strip) {
   }
 }
 
-void drawSprites() {
-  //SPRITE CASTING
-  //sort sprites from far to close
-  for(int i = 0; i < numSprites; i++)
-  {
-    spriteOrder[i] = i;
-    spriteDistance[i] = ((posX - sprite[i].x) * (posX - sprite[i].x) + (posY - sprite[i].y) * (posY - sprite[i].y)); //sqrt not taken, unneeded
-  }
-  sortSprites(spriteOrder, spriteDistance, numSprites);
+struct SpritePrepare {
+  int drawStartX, drawEndX;
+  int dX, cX, texX;
+  int drawStartY, drawEndY;
+  int dY, texY0, cY0;
+  int texNum;
+  double transformY;
+  double fog;
+};
 
-  //after sorting the sprites, do the projection and draw them
+bool prepsSort (SpritePrepare &i, SpritePrepare &j) { return (i.transformY > j.transformY); }
+
+std::vector<SpritePrepare> preps;
+
+//SPRITE CASTING
+void prepareSprites() {
+
+  preps.clear();
+
+  SpritePrepare prep;
+
   for(int i = 0; i < numSprites; i++)
   {
     //translate sprite position to relative to camera
-    double spriteX = sprite[spriteOrder[i]].x - posX;
-    double spriteY = sprite[spriteOrder[i]].y - posY;
+    double spriteX = sprite[i].x - posX;
+    double spriteY = sprite[i].y - posY;
 
     //transform sprite with the inverse camera matrix
     // [ planeX   dirX ] -1                                       [ dirY      -dirX ]
@@ -314,11 +323,11 @@ void drawSprites() {
     double invDet = 1.0 / (planeX * dirY - dirX * planeY); //required for correct matrix multiplication
 
     double transformX = invDet * (dirY * spriteX - dirX * spriteY);
-    double transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
+    prep.transformY = invDet * (-planeY * spriteX + planeX * spriteY); //this is actually the depth inside the screen, that what Z is in 3D, the distance of sprite to player, matching sqrt(spriteDistance[i])
 
-    if(transformY < 0) continue;
+    if(prep.transformY < 0) continue;
 
-    int spriteScreenX = int((w / 2) * (1 + transformX / transformY));
+    int spriteScreenX = int((w / 2) * (1 + transformX / prep.transformY));
 
     //parameters for scaling and moving the sprites
     #define uDiv 2
@@ -326,77 +335,97 @@ void drawSprites() {
     // Note that vMove is 128 rather than 64 to get the sprites on the ground.
     // It's because the textures are 32x32, rather than 64x64 as in the original.
     #define vMove 128.0
-    int vMoveScreen = int(vMove / transformY);
+    int vMoveScreen = int(vMove / prep.transformY);
 
     //calculate height of the sprite on screen
-    int spriteHeight = abs(int(h / (transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
+    int spriteHeight = abs(int(h / (prep.transformY))) / vDiv; //using "transformY" instead of the real distance prevents fisheye
     //calculate lowest and highest pixel to fill in current stripe
-    int drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
-    int drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/transformY;
+    prep.drawStartY = -spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/prep.transformY;
+    prep.drawEndY = spriteHeight / 2 + h / 2 + vMoveScreen + lookVert + eyePos/prep.transformY;
 
     //calculate width of the sprite
-    int spriteWidth = abs(int (h / (transformY))) / uDiv; // same as height of sprite, given that it's square
-    int drawStartX = -spriteWidth / 2 + spriteScreenX;
-    int drawEndX = spriteWidth / 2 + spriteScreenX;
+    int spriteWidth = abs(int (h / (prep.transformY))) / uDiv; // same as height of sprite, given that it's square
+    prep.drawStartX = -spriteWidth / 2 + spriteScreenX;
+    prep.drawEndX = spriteWidth / 2 + spriteScreenX;
+
+    if(prep.drawStartX >= w || prep.drawEndX < 0) continue;
 
     // Precompute some variables for the vertical strips
-    int dY = drawEndY - drawStartY;
-    int cY0 = 0, texY0 = 0;
-    if(drawStartY < 0) {
-        cY0 = -drawStartY * texHeight;
-        if(cY0 > dY) {
-            div_t res = div(cY0, dY);
-            texY0 += res.quot;
-            cY0 = res.rem;
+    prep.dY = prep.drawEndY - prep.drawStartY;
+    prep.cY0 = 0;
+    prep.texY0 = 0;
+    if(prep.drawStartY < 0) {
+        prep.cY0 = -prep.drawStartY * texHeight;
+        if(prep.cY0 > prep.dY) {
+            div_t res = div(prep.cY0, prep.dY);
+            prep.texY0 += res.quot;
+            prep.cY0 = res.rem;
         }
-        drawStartY = 0;
+        prep.drawStartY = 0;
     }
-    if(drawEndY >= h)
-      drawEndY = (h-1);
+    if(prep.drawEndY >= h)
+      prep.drawEndY = (h-1);
 
-    int texX = 0, dX = drawEndX - drawStartX, cX = 0;
+    prep.texX = 0;
+    prep.dX = prep.drawEndX - prep.drawStartX;
+    prep.cX = 0;
 
-    if(drawStartX < 0) {
-        cX = -drawStartX * texWidth;
-        if(cX > dX) {
-            div_t res = div(cX, dX);
-            texX += res.quot;
-            cX = res.rem;
+    if(prep.drawStartX < 0) {
+        prep.cX = -prep.drawStartX * texWidth;
+        if(prep.cX > prep.dX) {
+            div_t res = div(prep.cX, prep.dX);
+            prep.texX += res.quot;
+            prep.cX = res.rem;
         }
-        drawStartX = 0;
+        prep.drawStartX = 0;
     }
-    if(drawEndX > w) drawEndX = w;
+    if(prep.drawEndX > w) prep.drawEndX = w;
 
 #if FOG_LEVEL
-    double fog = transformY / FOG_CONSTANT * FOG_LEVEL;
+    prep.fog = prep.transformY / FOG_CONSTANT * FOG_LEVEL;
 #endif
 
-    for(int stripe = drawStartX; stripe < drawEndX; stripe++) {
+    prep.texNum = sprite[i].texture;
+    preps.push_back(prep);
+  }
 
-      int texY = texY0, cY = cY0;
-      for(int y = drawStartY; y <= drawEndY; y++) {
+  //sort sprites from far to close
+  std::sort(preps.begin(), preps.end(), prepsSort);
+}
 
-        if(transformY < ZBuffer[y][stripe]) {
-          Uint32 color = texture[sprite[spriteOrder[i]].texture][texWidth * texY + texX]; //get current color from the texture
+void drawSprites() {
+
+  //after sorting the sprites, do the projection and draw them
+  for(unsigned int i = 0; i < preps.size(); i++)
+  {
+    SpritePrepare &prep = preps[i];
+
+    for(int stripe = prep.drawStartX; stripe < prep.drawEndX; stripe++) {
+
+      int texY = prep.texY0, cY = prep.cY0;
+      for(int y = prep.drawStartY; y <= prep.drawEndY; y++) {
+
+        if(prep.transformY < ZBuffer[y][stripe]) {
+          Uint32 color = texture[prep.texNum][texWidth * texY + prep.texX]; //get current color from the texture
           if((color & 0x00FFFFFF) != 0) {
 #if FOG_LEVEL
-            color = color_lerp(color, FOG_COLOR, fog);
+            color = color_lerp(color, FOG_COLOR, prep.fog);
 #endif
             buffer[y][stripe] = color; //paint pixel if it isn't black, black is the invisible color
           }
         }
 
         cY = cY + texHeight;
-        while(cY > dY) {
+        while(cY > prep.dY) {
           texY++;
-          cY -= dY;
+          cY -= prep.dY;
         }
       }
 
-      cX += texWidth;
-      while(cX > dX) {
-        texX++;
-        cX -= dX;
+      prep.cX += texWidth;
+      while(prep.cX > prep.dX) {
+        prep.texX++;
+        prep.cX -= prep.dX;
       }
     }
   }
@@ -613,6 +642,8 @@ int main(int /*argc*/, char */*argv*/[])
     }
 #endif
 
+    prepareSprites();
+
     // WALL CASTING
     std::stack<Strip> stack;
     for(int x = 0; x < w; x++)
@@ -772,6 +803,10 @@ rayscan:
     time = getTicks();
     double frameTime = (time - oldTime) / 1000.0; //frametime is the time this frame has taken, in seconds
     print(1.0 / frameTime); //FPS counter
+
+    print((int)posX, 10, 10);
+    print((int)posY, 40, 10);
+
     redraw();
 
     doorTime += frameTime;
