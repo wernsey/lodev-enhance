@@ -21,7 +21,7 @@ else
   LDFLAGS += -s
 endif
 
-SOURCES=quickcg.cpp raycaster_sprites.cpp
+SOURCES=quickcg.cpp raycaster.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 
 all: main
@@ -36,7 +36,7 @@ main: $(OBJECTS)
 	$(CC) $(CPPFLAGS) $< -o $@
 
 quickcg.o: quickcg.cpp quickcg.h
-raycaster_sprites.o: raycaster_sprites.cpp quickcg.h
+raycaster.o: raycaster.cpp quickcg.h
 
 .PHONY : clean deps
 
