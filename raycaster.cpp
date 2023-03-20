@@ -721,14 +721,14 @@ rayscan:
         if(texNum == 8)
           door = findDoor(mapX, mapY); /* Door encountered */
         if(side == 0) {
-          double dist = sideDistX - 0.5;
+          double dist = sideDistX - deltaDistX*0.5;
           if(sideDistY < dist) {
             hit = 0;
             goto rayscan;
           }
           perpWallDist = dist;
         } else {
-          double dist = sideDistY - 0.5;
+          double dist = sideDistY - deltaDistY*0.5;
           if(sideDistX < dist) {
             hit = 0;
             goto rayscan;
