@@ -55,10 +55,10 @@ int worldMap[mapWidth][mapHeight] =
 {
   {8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 6, 4, 4, 6, 4, 6, 4, 4, 4, 6, 4},
   {8, 0, 0, 0, 0, 0, 0, 0,12, 0, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
-  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
-  {8, 0, 0, 3, 0, 0, 0, 0,10, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6},
-  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4},
-  {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 6, 6, 6, 0, 6, 4, 6},
+  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 1, 1,14, 1, 1, 0, 0, 0, 6},
+  {8, 0, 0, 3, 0, 0, 0, 0,10, 0,10, 0, 0, 0, 0,14, 0, 0, 0,14, 0, 0, 0, 6},
+  {8, 0, 3, 3, 0, 0, 0, 0, 8, 8, 8, 4, 0, 0, 0, 1, 1, 0,14, 1, 0, 0, 0, 4},
+  {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 6, 4, 6},
   {8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 6, 0, 0, 0, 0, 0, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 0, 8, 0, 8, 0, 8, 0, 8, 4, 0, 4, 0, 6, 0, 6},
   {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6},
@@ -66,12 +66,12 @@ int worldMap[mapWidth][mapHeight] =
   {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
   {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6,10, 6, 6, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4,12, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
-  {2, 2, 2, 2, 0, 2, 2, 2, 2, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
-  {2, 2, 0, 0, 0, 0, 0, 2, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
-  {2, 0, 0, 0, 0, 0, 0, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
-  {1, 0, 0, 0, 0, 0, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
-  {2, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 1, 2, 2, 2,12, 6, 0, 0, 5, 0, 5, 0, 5},
-  {2, 2, 0, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
+  {2, 2, 2, 2, 0, 2, 0, 0, 0, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
+  {2, 2, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
+  {2, 0, 0, 0, 0, 2, 2, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
+  {1, 0, 0, 0, 0, 1, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
+  {2, 0, 0, 0, 0, 2, 0, 0, 2, 2, 2, 1, 2, 2, 2,12, 6, 0, 0, 5, 0, 5, 0, 5},
+  {2, 2, 0, 0, 0, 2,14, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
   {1,12, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
   {2, 0,11, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
@@ -137,6 +137,7 @@ void sortSprites(int* order, double* dist, int amount);
 
 #define MAX_DOORS 20
 enum DoorState {closed, opening, open, closing};
+enum Direction {dir_N, dir_S, dir_E, dir_W};
 struct Door {
   int x, y;
   int counter;
@@ -144,7 +145,16 @@ struct Door {
 } doors[MAX_DOORS];
 int numDoors = 0;
 
-void processDoors() {
+#define MAX_PUSH_WALLS 20
+struct PushWall {
+  int x, y;
+  int counter;
+  DoorState state;
+  Direction direction;
+} pushWalls[MAX_PUSH_WALLS];
+int numPushWalls = 0;
+
+void preProcessMap() {
   numDoors = 0;
   for(int x = 0; x < mapWidth; x++) {
     for(int y = 0; y < mapHeight; y++) {
@@ -158,6 +168,16 @@ void processDoors() {
         door->y = y;
         door->state = closed;
         door->counter = texWidth;
+      } else if(worldMap[x][y] == 14) {
+        if(numPushWalls == MAX_PUSH_WALLS) {
+          std::cout << "Too many push walls!" << std::endl;
+          return;
+        }
+        PushWall *pw = &pushWalls[numPushWalls++];
+        pw->x = x;
+        pw->y = y;
+        pw->state = closed;
+        pw->counter = texWidth;
       }
     }
   }
@@ -173,7 +193,28 @@ Door *findDoor(int x, int y) {
   return NULL;
 }
 
-void updateDoors() {
+PushWall *findPushWall(int x, int y) {
+  for(int i = 0; i < numPushWalls; i++) {
+    PushWall *pw = &pushWalls[i];
+    if(pw->x == x && pw->y == y) {
+      return pw;
+    }
+  }
+  return NULL;
+}
+
+bool wallCanMove(PushWall *pw, Direction dir) {
+  int nx, ny;
+  switch(dir) {
+    case dir_N : nx = pw->x; ny = pw->y-1; break;
+    case dir_S : nx = pw->x; ny = pw->y+1; break;
+    case dir_E : nx = pw->x+1; ny = pw->y; break;
+    case dir_W : nx = pw->x-1; ny = pw->y; break;
+  }
+  return worldMap[nx][ny] == 0;
+}
+
+void updateMap() {
   for(int i = 0; i < numDoors; i++) {
     Door *door = &doors[i];
     switch(door->state) {
@@ -188,6 +229,28 @@ void updateDoors() {
         }
       break;
       default: break;
+    }
+  }
+  for(int i = 0; i < numPushWalls; i++) {
+    PushWall *pw = &pushWalls[i];
+    if(pw->state == opening) {
+      int mx, my;
+      if(--pw->counter == 0) {
+        switch(pw->direction) {
+          case dir_N : mx = pw->x; my = pw->y-1; break;
+          case dir_S : mx = pw->x; my = pw->y+1; break;
+          case dir_E : mx = pw->x+1; my = pw->y; break;
+          case dir_W : mx = pw->x-1; my = pw->y; break;
+        }
+        pw->counter = texWidth;
+        worldMap[pw->x][pw->y] = 0;
+        pw->x = mx;
+        pw->y = my;
+        worldMap[mx][my] = 14;
+
+        if(!wallCanMove(pw, pw->direction))
+          pw->state = open;
+      }
     }
   }
 }
@@ -435,7 +498,7 @@ int main(int /*argc*/, char */*argv*/[])
   double time = 0; //time of current frame
   double oldTime = 0; //time of previous frame
 
-  for(int i = 0; i < 11; i++) texture[i].resize(texWidth * texHeight);
+  for(int i = 0; i < 13; i++) texture[i].resize(texWidth * texHeight);
 
 #if SKYBOX
   std::vector<Uint32> skybox{320 * 240};
@@ -458,6 +521,7 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[10], tw, th, "pics/gate.png");
   error |= loadImage(texture[11], tw, th, "pics/glass.png");
   error |= loadImage(texture[12], tw, th, "pics/glass-break.png");
+  error |= loadImage(texture[13], tw, th, "pics/secret.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
@@ -471,7 +535,7 @@ int main(int /*argc*/, char */*argv*/[])
 #endif
 
   double doorTime = 0;
-  processDoors();
+  preProcessMap();
 
   //start the main loop
   while(!done())
@@ -640,6 +704,19 @@ int main(int /*argc*/, char */*argv*/[])
 
     prepareSprites();
 
+    Direction playerDirection;
+    if(abs(dirX) > abs(dirY)) {
+      if(dirX > 0)
+        playerDirection = dir_E;
+      else
+        playerDirection = dir_W;
+    } else {
+      if(dirY > 0)
+        playerDirection = dir_S;
+      else
+        playerDirection = dir_N;
+    }
+
     // WALL CASTING
     std::stack<Strip> stack;
     for(int x = 0; x < w; x++)
@@ -716,6 +793,7 @@ rayscan:
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
       Door *door = NULL;
+      PushWall *pw = NULL;
       if(texNum == 8 || texNum == 9 || texNum == 10 || texNum == 11 || texNum == 12) {
         /* Sunken wall encountered */
         if(texNum == 8)
@@ -729,6 +807,23 @@ rayscan:
           perpWallDist = dist;
         } else {
           double dist = sideDistY - deltaDistY*0.5;
+          if(sideDistX < dist) {
+            hit = 0;
+            goto rayscan;
+          }
+          perpWallDist = dist;
+        }
+      } else if(texNum == 13 && (pw = findPushWall(mapX, mapY))) {
+        /* Secret push wall encountered */
+        if(side == 0) {
+          double dist = sideDistX - deltaDistX * (double)pw->counter / texWidth;
+          if(sideDistY < dist) {
+            hit = 0;
+            goto rayscan;
+          }
+          perpWallDist = dist;
+        } else {
+          double dist = sideDistY - deltaDistY * (double)pw->counter / texWidth;
           if(sideDistX < dist) {
             hit = 0;
             goto rayscan;
@@ -824,7 +919,7 @@ rayscan:
 
     doorTime += frameTime;
     if(doorTime > 1.0/texWidth) {
-      updateDoors();
+      updateMap();
       doorTime -= 1.0/texWidth;
     }
 
@@ -877,8 +972,14 @@ rayscan:
           case open: door->state = closing; break;
           default: break;
         }
-      } else if(worldMap[faceX][faceY] == 12) {
-        worldMap[faceX][faceY] = 13;
+      } else {
+        PushWall *pw = findPushWall(faceX, faceY);
+        if(pw && pw->state == closed && wallCanMove(pw, playerDirection)) {
+          pw->direction = playerDirection;
+          pw->state = opening;
+        } else if(worldMap[faceX][faceY] == 12) {
+          worldMap[faceX][faceY] = 13;
+        }
       }
     }
     if(keyDown(SDLK_q)) {
