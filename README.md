@@ -163,3 +163,12 @@ interacts with them. These can be used to implement secret passages
 in your levels.
 
 ![A push wall](screens/push-wall.gif)
+
+# Step 11: Diagonal Walls
+
+In this step, we implement walls that run diagonally across the grid.
+
+![Some diagonal walls](screens/step10a.gif)
+
+![Intersection between a ray and a diagonal wall](screens/diag-diagram.png)
+

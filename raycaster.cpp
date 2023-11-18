@@ -61,21 +61,21 @@ int worldMap[mapWidth][mapHeight] =
   {8, 0, 0, 0, 0, 0, 0, 0,11, 0, 8, 4, 0, 0, 0, 0, 0, 1, 0, 0, 0, 6, 4, 6},
   {8, 8, 8, 8, 0, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 6, 0, 0, 0, 0, 0, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 0, 8, 0, 8, 0, 8, 0, 8, 4, 0, 4, 0, 6, 0, 6},
-  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6},
-  {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4},
-  {7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
-  {7, 7, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6,10, 6, 6, 6},
+  {7, 0, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 0, 0, 0, 0, 0, 6},
+  {7, 0,16, 7,15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 0, 0, 0, 0, 4},
+  {7, 0,15, 8,16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 8, 6, 0, 6, 0, 6, 0, 6},
+  {7, 0, 0, 0, 0, 0, 0, 0, 7, 8, 0, 8, 0, 8, 0, 8, 8, 6, 4, 6,10, 6, 6, 6},
   {7, 7, 7, 7, 9, 7, 7, 7, 7, 8, 8, 4,12, 6, 8, 4, 8, 3, 3, 3, 0, 3, 3, 3},
   {2, 2, 2, 2, 0, 2, 0, 0, 0, 4, 6, 4, 0, 0, 6, 0, 6, 3, 0, 0, 0, 0, 0, 3},
   {2, 2, 0, 0, 0, 1, 0, 0, 0, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
   {2, 0, 0, 0, 0, 2, 2, 0, 2, 4, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 0, 0, 0, 3},
   {1, 0, 0, 0, 0, 1, 0, 0, 1, 4, 4, 4, 4, 4, 6, 0, 6, 3, 3, 0, 0, 0, 3, 3},
-  {2, 0, 0, 0, 0, 2, 0, 0, 2, 2, 2, 1, 2, 2, 2,12, 6, 0, 0, 5, 0, 5, 0, 5},
-  {2, 2, 0, 0, 0, 2,14, 2, 2, 2, 0, 0, 0, 2, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
+  {2,15, 0, 0, 0, 2, 0, 0, 2, 2, 2, 1, 2, 2, 2,12, 6, 0, 0, 5, 0, 5, 0, 5},
+  {2,16, 0, 0, 0, 2,14, 2, 2,16, 0, 0, 0,15, 2, 0, 0, 0, 0, 5, 0, 0, 5, 5},
   {2, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
   {1,12, 2, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0,10, 0, 0, 0, 0, 0, 0, 0, 0, 5},
   {2, 0,11, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, 2, 5,12, 5,12, 5, 0, 5, 0, 5},
-  {2, 2, 1, 0, 0, 0, 0, 2, 2, 2, 0, 0, 0, 2, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
+  {2, 2, 1, 0, 0, 0, 0, 2, 2,15, 0, 0, 0,16, 2, 0, 5, 0, 5, 0, 0, 0, 5, 5},
   {2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5}
 };
 
@@ -328,7 +328,8 @@ void drawStrip(Strip &strip) {
 
     if((color & 0xFF000000) != 0) {
       //make color darker for y-sides: R, G and B byte each divided through two with a "shift" and an "and"
-      if(strip.side == 1) color = (color >> 1) & 8355711;
+      if(strip.side > 1) color = (color >> 1) & 8355711;
+      if(strip.side == 1) color = (color >> 2) & 0x3F3F3F;
 
 #if FOG_LEVEL
       color = color_lerp(color, FOG_COLOR, strip.fog);
@@ -493,6 +494,20 @@ void drawSpriteStrip(SpritePrepare &prep, int stripe) {
   }
 }
 
+struct intersect {
+  double tr, tw;
+};
+
+struct intersect wallIntersect(double W0x, double W0y, double W1x, double W1y,
+                              double Px, double Py, double Dx, double Dy) {
+  struct intersect i = {-1, -1};
+  double M = (W1y - W0y) / (W1x - W0x); // Note to self: M = -1 or 1 in our case
+  if(Dy == M * Dx) return i; // parallel ray
+  i.tr = (W0y + M * (Px - W0x) - Py) / (Dy - M * Dx);
+  i.tw = (Px + Dx * i.tr - W0x) / (W1x - W0x); // Note to self: W1x - W0x == 1 in our case
+  return i;
+}
+
 int main(int /*argc*/, char */*argv*/[])
 {
   double time = 0; //time of current frame
@@ -522,6 +537,8 @@ int main(int /*argc*/, char */*argv*/[])
   error |= loadImage(texture[11], tw, th, "pics/glass.png");
   error |= loadImage(texture[12], tw, th, "pics/glass-break.png");
   error |= loadImage(texture[13], tw, th, "pics/secret.png");
+  error |= loadImage(texture[14], tw, th, "pics/wall5.png");
+  error |= loadImage(texture[15], tw, th, "pics/wall6.png");
   if(error) { std::cout << "error loading images" << std::endl; return 1; }
 
   //load some sprite textures
@@ -792,6 +809,8 @@ rayscan:
       //texturing calculations
       int texNum = worldMap[mapX][mapY] - 1; //1 subtracted from it so that texture 0 can be used!
 
+      double wallX; //where exactly the wall was hit
+      bool diag = false;
       Door *door = NULL;
       PushWall *pw = NULL;
       if(texNum == 8 || texNum == 9 || texNum == 10 || texNum == 11 || texNum == 12) {
@@ -830,6 +849,26 @@ rayscan:
           }
           perpWallDist = dist;
         }
+      } else if(texNum == 14 || texNum == 15) {
+        /* Diagonal wall */
+        struct intersect i;
+        double d;
+        if(texNum == 14) {
+          i = wallIntersect(mapX, mapY, mapX + 1, mapY + 1, posX, posY, rayDirX, rayDirY);
+          d = posX - mapX - posY + mapY;
+        } else {
+          i = wallIntersect(mapX, mapY + 1, mapX + 1, mapY, posX, posY, rayDirX, rayDirY);
+          d = mapX - posX - posY + mapY + 1;
+        }
+        if(i.tw < 0.0 || i.tw >= 1.0) {
+          hit = 0;
+          goto rayscan;
+        }
+        perpWallDist = i.tr;
+        wallX = i.tw;
+        if(d < 0) wallX = 1.0 - wallX;
+        diag = true;
+        side = 3;
       } else {
         //Calculate distance of perpendicular ray (Euclidean distance would give fisheye effect!)
         if(side == 0) perpWallDist = (sideDistX - deltaDistX);
@@ -843,11 +882,12 @@ rayscan:
       int drawStart = -lineHeight / 2 + h / 2 + lookVert + eyePos/perpWallDist;
       int drawEnd = lineHeight / 2 + h / 2 + lookVert + eyePos/perpWallDist;
 
-      //calculate value of wallX
-      double wallX; //where exactly the wall was hit
-      if (side == 0) wallX = posY + perpWallDist * rayDirY;
-      else           wallX = posX + perpWallDist * rayDirX;
-      wallX -= floor((wallX));
+      if(!diag) {
+        //calculate value of wallX
+        if (side == 0) wallX = posY + perpWallDist * rayDirY;
+        else           wallX = posX + perpWallDist * rayDirX;
+        wallX -= floor((wallX));
+      }
 
       //x coordinate on the texture
       int texX = int(wallX * double(texWidth));
