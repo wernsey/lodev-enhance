@@ -166,6 +166,8 @@ in your levels.
 
 # Step 11: Diagonal Walls
 
+* [commit 7becaa49db95f28f788be632e1de03e8c60acdb2](https://github.com/wernsey/lodev-enhance/commit/7becaa49db95f28f788be632e1de03e8c60acdb2)
+
 In this step, we implement walls that run diagonally across the grid.
 
 ![Some diagonal walls](screens/step10a.gif)
